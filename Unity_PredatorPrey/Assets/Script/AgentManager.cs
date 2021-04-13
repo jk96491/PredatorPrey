@@ -69,12 +69,11 @@ public class AgentManager : Agent
 
     public override void OnActionReceived(ActionBuffers actions)
     {
+        var selectActions = actions.DiscreteActions;
 
-    }
-
-    public override void Heuristic(in ActionBuffers actionsOut)
-    {
-
+        Debug.Log(string.Format("agent1 : {0}", selectActions[0]));
+        Debug.Log(string.Format("agent2 : {0}", selectActions[1]));
+        Debug.Log(string.Format("agent3 : {0}", selectActions[2]));
     }
 
     public override void OnEpisodeBegin()
