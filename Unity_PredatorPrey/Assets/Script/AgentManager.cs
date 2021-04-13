@@ -13,6 +13,9 @@ public class AgentManager : Agent
     EnvironmentParameters m_ResetParams;
     ObservationManager observationManager;
 
+    float m_TimeSinceDecision;
+    public float timeBetweenDecisionsAtInference;
+
     public delegate void EpisodeBegin();
     public EpisodeBegin EpisodeBeginDel;
 
@@ -71,9 +74,11 @@ public class AgentManager : Agent
     {
         var selectActions = actions.DiscreteActions;
 
-        Debug.Log(string.Format("agent1 : {0}", selectActions[0]));
-        Debug.Log(string.Format("agent2 : {0}", selectActions[1]));
-        Debug.Log(string.Format("agent3 : {0}", selectActions[2]));
+        for (int i = 0; i < agents.Count; i++)
+        {
+            if(null != agents[i])
+                agents[i].SetAction(selectActions[i]);
+        }
     }
 
     public override void OnEpisodeBegin()
@@ -83,5 +88,30 @@ public class AgentManager : Agent
 
         if (null != EpisodeBeginDel)
             EpisodeBeginDel();
+    }
+
+    public void FixedUpdate()
+    {
+        WaitTimeInference();
+    }
+
+    void WaitTimeInference()
+    {
+        if (Academy.Instance.IsCommunicatorOn)
+        {
+            RequestDecision();
+        }
+        else
+        {
+            if (m_TimeSinceDecision >= timeBetweenDecisionsAtInference)
+            {
+                m_TimeSinceDecision = 0f;
+                RequestDecision();
+            }
+            else
+            {
+                m_TimeSinceDecision += Time.fixedDeltaTime;
+            }
+        }
     }
 }

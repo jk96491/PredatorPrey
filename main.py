@@ -1,5 +1,5 @@
 import numpy as np
-from mlagents_envs.environment import UnityEnvironment
+from mlagents_envs.environment import UnityEnvironment, ActionTuple
 from mlagents_envs.side_channel.engine_configuration_channel\
                              import EngineConfigurationChannel
 
@@ -8,6 +8,8 @@ train_mode = True
 
 run_step = 50000 if train_mode else 0
 test_step = 10000
+
+env_name = 'env/PredatorPrey'
 
 if __name__ == '__main__':
     # 유니티 환경 경로 설정 (file_name)
@@ -40,7 +42,9 @@ if __name__ == '__main__':
         obs = data[0, 24:]
 
         action = np.array([[2, 3, 1]])
-        env.set_actions(group_name, action)
+        action_tuple = ActionTuple()
+        action_tuple.add_discrete(action)
+        env.set_actions(group_name, action_tuple)
         env.step()
 
         dec, term = env.get_steps(group_name)
