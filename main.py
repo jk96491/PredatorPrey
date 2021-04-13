@@ -9,7 +9,7 @@ train_mode = True
 run_step = 50000 if train_mode else 0
 test_step = 10000
 
-env_name = 'env/PredatorPrey'
+env_name = 'PredatorPrey_Game/PredatorPrey'
 
 if __name__ == '__main__':
     # 유니티 환경 경로 설정 (file_name)
