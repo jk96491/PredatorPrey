@@ -114,6 +114,8 @@ public class Area : MonoBehaviour
 
         for (int i = 0; i < goals.Count; i++)
             goals[i].SetActive(true);
+
+        step_count = 0;
     }
 
     public void ResetPostion()
@@ -141,6 +143,7 @@ public class Area : MonoBehaviour
         }
     }
 
+    int step_count = 0;
     private void EpisodeBegin()
     {
         ResetEnv();
@@ -148,6 +151,7 @@ public class Area : MonoBehaviour
 
     private void CalcReward(List<PlayAgent> agents)
     {
+        step_count++;
         for (int agent_index = 0; agent_index < agents.Count; agent_index++)
         {
             if (null == agents[agent_index])
@@ -183,8 +187,10 @@ public class Area : MonoBehaviour
 
         if(obtain_count == maxGoalNums)
         {
-            agentManager.SetReward(10f);
+            agentManager.AddReward(10f);
+            agentManager.AddReward(((160f - step_count) / 160f) * 5f);
             agentManager.EndEpisode();
         }
+
     }
 }

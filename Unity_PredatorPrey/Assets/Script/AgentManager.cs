@@ -106,7 +106,7 @@ public class AgentManager : Agent
 
     public override void OnActionReceived(ActionBuffers actions)
     {
-        AddReward(-0.01f);
+        //AddReward(-0.01f);
 
         var selectActions = actions.DiscreteActions;
 

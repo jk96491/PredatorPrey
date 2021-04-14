@@ -79,8 +79,7 @@ def run_sequential(args, logger):
 
     env.reset()
     # 유니티 브레인 설정
-    group_name = list(env.behavior_specs.keys())[0]
-    engine_configuration_channel.set_configuration_parameters(time_scale=1.0)
+    engine_configuration_channel.set_configuration_parameters(time_scale=12.0)
 
     learner = le_REGISTRY[args.learner](mac, buffer.scheme, logger, args)
 

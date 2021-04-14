@@ -171,7 +171,7 @@ MonoBehaviour:
   agentParameters:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
-  MaxStep: 0
+  MaxStep: 160
   agents: []
   timeBetweenDecisionsAtInference: 5
 --- !u!114 &13522631
