@@ -51,6 +51,36 @@ public class AgentManager : Agent
             agents[index].SetPostion(x, z);
     }
 
+    public override void WriteDiscreteActionMask(IDiscreteActionMask actionMask)
+    {
+        // Mask the necessary actions if selected by the user.
+        for (int i = 0; i < agents.Count; i++)
+        {
+            var positionX = (int)agents[i].Trans.localPosition.x;
+            var positionZ = (int)agents[i].Trans.localPosition.z;
+            var maxPosition = 9;
+            if (positionX == -maxPosition)
+            {
+                actionMask.WriteMask(i, new[] { PlayAgent.k_Left });
+            }
+
+            if (positionX == maxPosition)
+            {
+                actionMask.WriteMask(i, new[] { PlayAgent.k_Right });
+            }
+
+            if (positionZ == -maxPosition)
+            {
+                actionMask.WriteMask(i, new[] { PlayAgent.k_Down });
+            }
+
+            if (positionZ == maxPosition)
+            {
+                actionMask.WriteMask(i, new[] { PlayAgent.k_Up });
+            }
+        }
+    }
+
     public override void CollectObservations(VectorSensor sensor)
     {
         // state

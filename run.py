@@ -11,6 +11,7 @@ from controller.basic_controller import BasicMAC
 from runners.episode_runner import EpisodeRunner
 from utils.logging import Logger
 from utils.timehelper import time_left, time_str
+import datetime
 import torch
 
 load_model = False
@@ -28,6 +29,8 @@ def runing(config, _log):
     args.device = "cuda" if args.use_cuda else "cpu"
 
     logger = Logger(_log)
+    unique_token = "{}__{}".format(args.name, datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
+    args.unique_token = unique_token
 
     run_sequential(args, logger)
 
@@ -42,7 +45,7 @@ def run_sequential(args, logger):
     args.n_agents = 3
     args.n_actions = 5
     args.state_shape = 24
-    args.obs_shape = 120
+    args.obs_shape = 40
 
     episode_limit = 160
 

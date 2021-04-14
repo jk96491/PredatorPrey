@@ -6,11 +6,11 @@ using System.Linq;
 
 public class PlayAgent : Entity
 {
-    const int k_NoAction = 0;  // do nothing!
-    const int k_Up = 1;
-    const int k_Down = 2;
-    const int k_Left = 3;
-    const int k_Right = 4;
+    public const int k_NoAction = 0;  // do nothing!
+    public const int k_Up = 1;
+    public const int k_Down = 2;
+    public const int k_Left = 3;
+    public const int k_Right = 4;
 
     private Vector3 moveRight = new Vector3(1f, 0, 0);
     private Vector3 moveLeft = new Vector3(-1f, 0, 0);

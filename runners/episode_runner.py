@@ -53,12 +53,7 @@ class EpisodeRunner:
         self.reset()
 
         behavior_name = list(self.env.behavior_specs.keys())[0]
-        dec, term = self.env.get_steps(behavior_name)
-
-        data = dec.obs[0]
-
-        state = data[0, :24]
-        obs = data[0, 24:]
+        state, obs, avail_actions = self.get_env_info(behavior_name)
 
         terminated = False
         episode_return = 0
@@ -68,7 +63,7 @@ class EpisodeRunner:
 
             pre_transition_data = {
                 "state": [state],
-                "avail_actions": [self.env.get_avail_actions()],
+                "avail_actions": [avail_actions],
                 "obs": [obs]
             }
 
@@ -78,8 +73,9 @@ class EpisodeRunner:
             # Receive the actions for each agent at this timestep in a batch of size 1
             actions = self.mac.select_actions(self.batch, t_ep=self.t, t_env=self.t_env, test_mode=test_mode)
 
+            detached_action = actions.detach().numpy()
             action_tuple = ActionTuple()
-            action_tuple.add_discrete(actions)
+            action_tuple.add_discrete(detached_action)
             self.env.set_actions(behavior_name, action_tuple)
             self.env.step()
 
@@ -92,17 +88,19 @@ class EpisodeRunner:
             post_transition_data = {
                 "actions": actions,
                 "reward": [(reward,)],
-                "terminated": [(terminated != env_info.get("episode_limit", False),)],
+                "terminated": [(terminated != terminated,)],
             }
 
             self.batch.update(post_transition_data, ts=self.t)
 
             self.t += 1
 
+        state, obs, avail_actions = self.get_env_info(behavior_name)
+
         last_data = {
-            "state": [self.env.get_state()],
-            "avail_actions": [self.env.get_avail_actions()],
-            "obs": [self.env.get_obs()]
+            "state": [state],
+            "avail_actions": [avail_actions],
+            "obs": [obs]
         }
         self.batch.update(last_data, ts=self.t)
 
@@ -113,7 +111,7 @@ class EpisodeRunner:
         cur_stats = self.test_stats if test_mode else self.train_stats
         cur_returns = self.test_returns if test_mode else self.train_returns
         log_prefix = "test_" if test_mode else ""
-        cur_stats.update({k: cur_stats.get(k, 0) + env_info.get(k, 0) for k in set(cur_stats) | set(env_info)})
+        #cur_stats.update({k: cur_stats.get(k, 0) + env_info.get(k, 0) for k in set(cur_stats) | set(env_info)})
         cur_stats["n_episodes"] = 1 + cur_stats.get("n_episodes", 0)
         cur_stats["ep_length"] = self.t + cur_stats.get("ep_length", 0)
 
@@ -141,3 +139,16 @@ class EpisodeRunner:
             if k != "n_episodes":
                 self.logger.log_stat(prefix + k + "_mean" , v/stats["n_episodes"], self.t_env)
         stats.clear()
+
+    def get_env_info(self, behavior_name):
+        dec, term = self.env.get_steps(behavior_name)
+        avail_actions = np.array(dec.action_mask).squeeze(axis=1)
+        avail_actions_float = np.zeros_like(avail_actions, dtype=np.float)
+        avail_actions_float[avail_actions == False] = 1
+        avail_actions = avail_actions_float
+        data = dec.obs[0]
+
+        state = data[0, :24]
+        obs = data[0, 24:].reshape(self.args.n_agents, -1)
+
+        return state, obs, avail_actions
