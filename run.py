@@ -6,6 +6,8 @@ from types import SimpleNamespace as SN
 from components.transforms import OneHot
 from components.episode_buffer import ReplayBuffer
 from controller.basic_controller import BasicMAC
+from runners.episode_runner import EpisodeRunner
+from utils.logging import Logger
 import torch
 
 load_model = False
@@ -16,10 +18,17 @@ test_step = 10000
 
 env_name = 'PredatorPrey_Game/PredatorPrey'
 
-def runing(config):
 
+def runing(config, _log):
+    _config = args_sanity_check(config, _log)
     args = SN(**config)
 
+    logger = Logger(_log)
+
+    run_sequential(args, logger)
+
+
+def run_sequential(args, logger):
     args.n_agents = 3
     args.n_actions = 5
     args.state_shape = 24
@@ -48,8 +57,9 @@ def runing(config):
 
     mac = BasicMAC(buffer.scheme, groups, args)
 
-    mac.init_hidden(batch_size=args.batch_size_run)
+    runner = EpisodeRunner(args=args, logger=logger)
 
+    runner.setup(scheme=scheme, groups=groups, preprocess=preprocess, mac=mac)
 
     # 유니티 환경 경로 설정 (file_name)
     engine_configuration_channel = EngineConfigurationChannel()
@@ -87,3 +97,18 @@ def runing(config):
         env.step()
 
         dec, term = env.get_steps(group_name)
+
+def args_sanity_check(config, _log):
+
+    # set CUDA flags
+    # config["use_cuda"] = True # Use cuda whenever possible!
+    if config["use_cuda"] and not torch.cuda.is_available():
+        config["use_cuda"] = False
+        _log.warning("CUDA flag use_cuda was switched OFF automatically because no CUDA devices are available!")
+
+    if config["test_nepisode"] < config["batch_size_run"]:
+        config["test_nepisode"] = config["batch_size_run"]
+    else:
+        config["test_nepisode"] = (config["test_nepisode"]//config["batch_size_run"]) * config["batch_size_run"]
+
+    return config
