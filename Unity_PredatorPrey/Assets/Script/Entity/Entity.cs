@@ -36,6 +36,7 @@ public class Entity : MonoBehaviour
     public void SetActive(bool active)
     {
         isActive = active;
+        gameObject.SetActive(active);
     }
     
 }
