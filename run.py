@@ -1,4 +1,6 @@
 import numpy as np
+import os
+import time
 from mlagents_envs.environment import UnityEnvironment, ActionTuple
 from mlagents_envs.side_channel.engine_configuration_channel\
                              import EngineConfigurationChannel
@@ -8,6 +10,7 @@ from components.episode_buffer import ReplayBuffer
 from controller.basic_controller import BasicMAC
 from runners.episode_runner import EpisodeRunner
 from utils.logging import Logger
+from utils.timehelper import time_left, time_str
 import torch
 
 load_model = False
@@ -22,6 +25,7 @@ env_name = 'PredatorPrey_Game/PredatorPrey'
 def runing(config, _log):
     _config = args_sanity_check(config, _log)
     args = SN(**config)
+    args.device = "cuda" if args.use_cuda else "cpu"
 
     logger = Logger(_log)
 
@@ -29,6 +33,12 @@ def runing(config, _log):
 
 
 def run_sequential(args, logger):
+    engine_configuration_channel = EngineConfigurationChannel()
+    env = UnityEnvironment(file_name=env_name,
+                           #    no_graphics=True,
+                           side_channels=[engine_configuration_channel])
+
+
     args.n_agents = 3
     args.n_actions = 5
     args.state_shape = 24
@@ -57,15 +67,12 @@ def run_sequential(args, logger):
 
     mac = BasicMAC(buffer.scheme, groups, args)
 
-    runner = EpisodeRunner(args=args, logger=logger)
+    runner = EpisodeRunner(args=args, logger=logger, env=env)
 
     runner.setup(scheme=scheme, groups=groups, preprocess=preprocess, mac=mac)
 
     # 유니티 환경 경로 설정 (file_name)
-    engine_configuration_channel = EngineConfigurationChannel()
-    env = UnityEnvironment(file_name=None,
-                           #    no_graphics=True,
-                           side_channels=[engine_configuration_channel])
+
     env.reset()
     # 유니티 브레인 설정
     group_name = list(env.behavior_specs.keys())[0]
@@ -73,30 +80,67 @@ def run_sequential(args, logger):
     engine_configuration_channel.set_configuration_parameters(time_scale=1.0)
     dec, term = env.get_steps(group_name)
 
-    # A2CAgent 클래스를 agent로 정의
-    # agent = A2CAgent()
+    episode = 0
+    last_test_T = -args.test_interval - 1
+    last_log_T = 0
+    model_save_time = 0
 
-    actor_losses, critic_losses, scores, episode, score = [], [], [], 0, 0
-    for step in range(run_step + test_step):
-        if step == run_step:
-            # if train_mode:
-            #    agent.save_model()
-            print("TEST START")
-            train_mode = False
-            engine_configuration_channel.set_configuration_parameters(time_scale=1.0)
+    start_time = time.time()
+    last_time = start_time
 
-        data = dec.obs[0]
+    logger.console_logger.info("Beginning training for {} timesteps".format(args.t_max))
 
-        state = data[0, :24]
-        obs = data[0, 24:]
+    while runner.t_env <= args.t_max:
 
-        action = np.array([[2, 3, 1]])
-        action_tuple = ActionTuple()
-        action_tuple.add_discrete(action)
-        env.set_actions(group_name, action_tuple)
-        env.step()
+        # Run for a whole episode at a time
+        episode_batch = runner.run(test_mode=False)
+        buffer.insert_episode_batch(episode_batch)
 
-        dec, term = env.get_steps(group_name)
+        if buffer.can_sample(args.batch_size):
+            episode_sample = buffer.sample(args.batch_size)
+
+            # Truncate batch to only filled timesteps
+            max_ep_t = episode_sample.max_t_filled()
+            episode_sample = episode_sample[:, :max_ep_t]
+
+            if episode_sample.device != args.device:
+                episode_sample.to(args.device)
+
+           # learner.train(episode_sample, runner.t_env, episode)
+
+        # Execute test runs once in a while
+        n_test_runs = max(1, args.test_nepisode // runner.batch_size)
+        if (runner.t_env - last_test_T) / args.test_interval >= 1.0:
+
+            logger.console_logger.info("t_env: {} / {}".format(runner.t_env, args.t_max))
+            logger.console_logger.info("Estimated time left: {}. Time passed: {}".format(
+                time_left(last_time, last_test_T, runner.t_env, args.t_max), time_str(time.time() - start_time)))
+            last_time = time.time()
+
+            last_test_T = runner.t_env
+            for _ in range(n_test_runs):
+                runner.run(test_mode=True)
+
+        if args.save_model and (runner.t_env - model_save_time >= args.save_model_interval or model_save_time == 0):
+            model_save_time = runner.t_env
+            save_path = os.path.join(args.local_results_path, "models", args.unique_token, str(runner.t_env))
+            #"results/models/{}".format(unique_token)
+            os.makedirs(save_path, exist_ok=True)
+            logger.console_logger.info("Saving models to {}".format(save_path))
+
+            # learner should handle saving/loading -- delegate actor save/load to mac,
+            # use appropriate filenames to do critics, optimizer states
+            #learner.save_models(save_path)
+
+        episode += args.batch_size_run
+
+        if (runner.t_env - last_log_T) >= args.log_interval:
+            logger.log_stat("episode", episode, runner.t_env)
+            logger.print_recent_stats()
+            last_log_T = runner.t_env
+
+    runner.close_env()
+    logger.console_logger.info("Finished Training")
 
 def args_sanity_check(config, _log):
 

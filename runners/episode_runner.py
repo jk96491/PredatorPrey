@@ -2,18 +2,19 @@
 from functools import partial
 from components.episode_buffer import EpisodeBatch
 import numpy as np
+from mlagents_envs.environment import ActionTuple
 
 
 class EpisodeRunner:
 
-    def __init__(self, args, logger):
+    def __init__(self, args, logger, env):
         self.args = args
         self.logger = logger
         self.batch_size = self.args.batch_size_run
         assert self.batch_size == 1
 
-        self.env = env_REGISTRY[self.args.env](**self.args.env_args)
-        self.episode_limit = self.env.episode_limit
+        self.env = env
+        self.episode_limit = 160
         self.t = 0
 
         self.t_env = 0
@@ -51,6 +52,14 @@ class EpisodeRunner:
     def run(self, test_mode=False):
         self.reset()
 
+        behavior_name = list(self.env.behavior_specs.keys())[0]
+        dec, term = self.env.get_steps(behavior_name)
+
+        data = dec.obs[0]
+
+        state = data[0, :24]
+        obs = data[0, 24:]
+
         terminated = False
         episode_return = 0
         self.mac.init_hidden(batch_size=self.batch_size)
@@ -58,9 +67,9 @@ class EpisodeRunner:
         while not terminated:
 
             pre_transition_data = {
-                "state": [self.env.get_state()],
+                "state": [state],
                 "avail_actions": [self.env.get_avail_actions()],
-                "obs": [self.env.get_obs()]
+                "obs": [obs]
             }
 
             self.batch.update(pre_transition_data, ts=self.t)
@@ -69,7 +78,15 @@ class EpisodeRunner:
             # Receive the actions for each agent at this timestep in a batch of size 1
             actions = self.mac.select_actions(self.batch, t_ep=self.t, t_env=self.t_env, test_mode=test_mode)
 
-            reward, terminated, env_info = self.env.step(actions[0])
+            action_tuple = ActionTuple()
+            action_tuple.add_discrete(actions)
+            self.env.set_actions(behavior_name, action_tuple)
+            self.env.step()
+
+            dec, term = self.env.get_steps(behavior_name)
+            terminated = len(term.agent_id) > 0
+            reward = term.reward if terminated else dec.reward
+
             episode_return += reward
 
             post_transition_data = {
