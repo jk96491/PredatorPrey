@@ -1,4 +1,5 @@
 import numpy as np
+from learners import REGISTRY as le_REGISTRY
 import os
 import time
 from mlagents_envs.environment import UnityEnvironment, ActionTuple
@@ -79,9 +80,9 @@ def run_sequential(args, logger):
     env.reset()
     # 유니티 브레인 설정
     group_name = list(env.behavior_specs.keys())[0]
-    group_spec = env.behavior_specs[group_name]
     engine_configuration_channel.set_configuration_parameters(time_scale=1.0)
-    dec, term = env.get_steps(group_name)
+
+    learner = le_REGISTRY[args.learner](mac, buffer.scheme, logger, args)
 
     episode = 0
     last_test_T = -args.test_interval - 1
@@ -109,7 +110,7 @@ def run_sequential(args, logger):
             if episode_sample.device != args.device:
                 episode_sample.to(args.device)
 
-           # learner.train(episode_sample, runner.t_env, episode)
+            learner.train(episode_sample, runner.t_env, episode)
 
         # Execute test runs once in a while
         n_test_runs = max(1, args.test_nepisode // runner.batch_size)
@@ -133,7 +134,7 @@ def run_sequential(args, logger):
 
             # learner should handle saving/loading -- delegate actor save/load to mac,
             # use appropriate filenames to do critics, optimizer states
-            #learner.save_models(save_path)
+            learner.save_models(save_path)
 
         episode += args.batch_size_run
 

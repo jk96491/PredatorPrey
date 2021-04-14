@@ -166,7 +166,7 @@ public class Area : MonoBehaviour
                 if(dis < 0.5f && goals[goal_index].IsActive)
                 {
                     goals[goal_index].SetActive(false);
-                    agentManager.AddReward(0.1f);
+                    agentManager.AddReward(1f);
                 }
             }
         }
@@ -183,7 +183,7 @@ public class Area : MonoBehaviour
 
         if(obtain_count == maxGoalNums)
         {
-            agentManager.SetReward(1f);
+            agentManager.SetReward(10f);
             agentManager.EndEpisode();
         }
     }
