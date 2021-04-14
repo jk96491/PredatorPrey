@@ -81,13 +81,7 @@ public class ObservationManager : MonoSingleton<ObservationManager>
                 if (i == index)
                     continue;
 
-                float srcAgentX = agents[index].Trans.position.x;
-                float srcAgentZ = agents[index].Trans.position.z;
-
-                float destAgentX = agents[i].Trans.position.x;
-                float destAgentZ = agents[i].Trans.position.z;
-
-                float dis = Mathf.Sqrt((destAgentX - srcAgentX) * (destAgentX - srcAgentX) + (destAgentZ - srcAgentZ) * (destAgentZ - srcAgentZ));
+                float dis = Utils.get_distance(agents[index].Trans, agents[i].Trans);
 
                 if(dis <= 5)
                 {
@@ -103,13 +97,7 @@ public class ObservationManager : MonoSingleton<ObservationManager>
                 if (i == index)
                     continue;
 
-                float AgentX = agents[index].Trans.position.x;
-                float AgentZ = agents[index].Trans.position.z;
-
-                float GoalX = goals[i].Trans.position.x;
-                float GoalZ = goals[i].Trans.position.z;
-
-                float dis = Mathf.Sqrt((GoalX - AgentX) * (GoalX - AgentX) + (GoalZ - AgentZ) * (GoalZ - AgentZ));
+                float dis = Utils.get_distance(agents[index].Trans, goals[i].Trans);
 
                 if (dis <= 5)
                 {

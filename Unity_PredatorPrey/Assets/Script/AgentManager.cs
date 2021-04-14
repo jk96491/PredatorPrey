@@ -19,9 +19,13 @@ public class AgentManager : Agent
     public delegate void EpisodeBegin();
     public EpisodeBegin EpisodeBeginDel;
 
-    public void InitDelgates(EpisodeBegin episodeBeginDel)
+    public delegate void CalcReward(List<PlayAgent> agents);
+    public CalcReward CalcRewardDel;
+
+    public void InitDelgates(EpisodeBegin episodeBeginDel, CalcReward CalcRewardDel_)
     {
         EpisodeBeginDel = episodeBeginDel;
+        CalcRewardDel = CalcRewardDel_;
     }
 
     public override void Initialize()
@@ -72,6 +76,8 @@ public class AgentManager : Agent
 
     public override void OnActionReceived(ActionBuffers actions)
     {
+        AddReward(-0.01f);
+
         var selectActions = actions.DiscreteActions;
 
         for (int i = 0; i < agents.Count; i++)
@@ -79,6 +85,9 @@ public class AgentManager : Agent
             if(null != agents[i])
                 agents[i].SetAction(selectActions[i]);
         }
+
+        if (null != CalcRewardDel)
+            CalcRewardDel(agents);
     }
 
     public override void OnEpisodeBegin()

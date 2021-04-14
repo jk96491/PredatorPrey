@@ -35,7 +35,7 @@ public class Area : MonoBehaviour
         CreateAgents();
         CreatGoals();
 
-        agentManager.InitDelgates(EpisodeBegin);
+        agentManager.InitDelgates(EpisodeBegin, CalcReward);
     }
 
     private void CreateAgents()
@@ -144,5 +144,47 @@ public class Area : MonoBehaviour
     private void EpisodeBegin()
     {
         ResetEnv();
+    }
+
+    private void CalcReward(List<PlayAgent> agents)
+    {
+        for (int agent_index = 0; agent_index < agents.Count; agent_index++)
+        {
+            if (null == agents[agent_index])
+                continue;
+
+            for (int goal_index = 0; goal_index <  goals.Count; goal_index++)
+            {
+                if (null == goals[goal_index])
+                    continue;
+
+                Transform agentTrans = agents[agent_index].Trans;
+                Transform goalTrans = goals[goal_index].Trans;
+
+                float dis = Utils.get_distance(agentTrans, goalTrans);
+
+                if(dis < 0.5f && goals[goal_index].IsActive)
+                {
+                    goals[goal_index].SetActive(false);
+                    agentManager.AddReward(0.1f);
+                }
+            }
+        }
+
+        int obtain_count = 0;
+        for (int goal_index = 0; goal_index < goals.Count; goal_index++)
+        {
+            if (null == goals[goal_index])
+                continue;
+
+            if (!goals[goal_index].IsActive)
+                obtain_count++;
+        }
+
+        if(obtain_count == maxGoalNums)
+        {
+            agentManager.SetReward(1f);
+            agentManager.EndEpisode();
+        }
     }
 }
