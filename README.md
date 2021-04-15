@@ -1,5 +1,5 @@
 # PredatorPrey 
-## ** 현재 실행가능한 MARL모델 : QMIX, COMA**
+## ** 현재 실행가능한 MARL모델 : QMIX, COMA **
 Unity로 멀티 에이전트 강화학습(MARL) 수행하기!
 
 ML-Agent를 이용하여 유니티 기반의 MARL 프레임웍을 제공합니다.
