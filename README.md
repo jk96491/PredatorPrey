@@ -4,6 +4,8 @@ Unity로 멀티 에이전트 강화학습(MARL) 수행하기!
 
 ML-Agent를 이용하여 유니티 기반의 MARL 프레임웍을 제공합니다.
 
+Unity 기반의 MARL 환경 제작이 필요하신분께 큰 도움이 되기를 바랍니다.~
+
 <img src="https://user-images.githubusercontent.com/17878413/114650020-760ada80-9d1c-11eb-8c5d-3a84173f7c9b.png" width="40%"></img>
 
 
