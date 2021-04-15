@@ -1,5 +1,5 @@
 # PredatorPrey
-# 현재 실행가능한 MARL모델 : QMIX
+# 현재 실행가능한 MARL모델 : QMIX, COMA
 
 ![Unity_MARL](https://user-images.githubusercontent.com/17878413/114650020-760ada80-9d1c-11eb-8c5d-3a84173f7c9b.png)
 
