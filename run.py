@@ -75,12 +75,6 @@ def run_sequential(args, logger):
 
     runner.setup(scheme=scheme, groups=groups, preprocess=preprocess, mac=mac)
 
-    # 유니티 환경 경로 설정 (file_name)
-
-    env.reset()
-    # 유니티 브레인 설정
-    engine_configuration_channel.set_configuration_parameters(time_scale=12.0)
-
     learner = le_REGISTRY[args.learner](mac, buffer.scheme, logger, args)
 
     episode = 0
@@ -94,7 +88,7 @@ def run_sequential(args, logger):
     logger.console_logger.info("Beginning training for {} timesteps".format(args.t_max))
 
     while runner.t_env <= args.t_max:
-        engine_configuration_channel.set_configuration_parameters(time_scale=1.0)
+        engine_configuration_channel.set_configuration_parameters(time_scale=12.0)
         # Run for a whole episode at a time
         episode_batch = runner.run(test_mode=False)
         buffer.insert_episode_batch(episode_batch)
