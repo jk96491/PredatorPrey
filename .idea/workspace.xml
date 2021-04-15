@@ -27,10 +27,32 @@
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\JGY\Desktop\Unity_MARL\trunk\env" />
       <recent name="C:\Users\JGY\Desktop\Unity_MARL\trunk\config\algs" />
     </key>
   </component>
   <component name="RunManager" selected="Python.main">
+    <configuration name="env_info" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="PredatorPrey" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/env" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/env/env_info.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="episode_runner" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="PredatorPrey" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -97,8 +119,9 @@
     <recent_temporary>
       <list>
         <item itemvalue="Python.main" />
-        <item itemvalue="Python.episode_runner" />
+        <item itemvalue="Python.env_info" />
         <item itemvalue="Python.run" />
+        <item itemvalue="Python.episode_runner" />
       </list>
     </recent_temporary>
   </component>
@@ -116,31 +139,36 @@
     <servers />
   </component>
   <component name="WindowStateProjectService">
-    <state width="1468" height="466" key="DebuggerActiveHint" timestamp="1618448545510">
-      <screen x="1920" y="-9" width="1920" height="1040" />
+    <state width="1468" height="466" key="DebuggerActiveHint" timestamp="1618486059196">
+      <screen x="0" y="0" width="1920" height="1040" />
     </state>
+    <state width="1468" height="466" key="DebuggerActiveHint/1920.-9.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1618486059196" />
     <state width="1468" height="466" key="DebuggerActiveHint/1920.-9.1920.1040/0.0.1920.1040@1920.-9.1920.1040" timestamp="1618448545510" />
     <state x="579" y="256" key="FileChooserDialogImpl" timestamp="1618395485820">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="740" y="261" key="FileChooserDialogImpl/1920.-9.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1618293010585" />
     <state x="579" y="256" key="FileChooserDialogImpl/1920.-9.1920.1040/0.0.1920.1040@1920.-9.1920.1040" timestamp="1618395485820" />
-    <state width="1899" height="282" key="GridCell.Tab.0.bottom" timestamp="1618449014888">
-      <screen x="1920" y="-9" width="1920" height="1040" />
+    <state width="1899" height="282" key="GridCell.Tab.0.bottom" timestamp="1618487121762">
+      <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="282" key="GridCell.Tab.0.bottom/1920.-9.1920.1040/0.0.1920.1040@1920.-9.1920.1040" timestamp="1618449014888" />
-    <state width="1899" height="282" key="GridCell.Tab.0.center" timestamp="1618449014886">
-      <screen x="1920" y="-9" width="1920" height="1040" />
+    <state width="1899" height="282" key="GridCell.Tab.0.bottom/1920.-9.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1618487121762" />
+    <state width="1899" height="282" key="GridCell.Tab.0.bottom/1920.-9.1920.1040/0.0.1920.1040@1920.-9.1920.1040" timestamp="1618449699623" />
+    <state width="1899" height="282" key="GridCell.Tab.0.center" timestamp="1618487121761">
+      <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="282" key="GridCell.Tab.0.center/1920.-9.1920.1040/0.0.1920.1040@1920.-9.1920.1040" timestamp="1618449014886" />
-    <state width="1899" height="282" key="GridCell.Tab.0.left" timestamp="1618449014886">
-      <screen x="1920" y="-9" width="1920" height="1040" />
+    <state width="1899" height="282" key="GridCell.Tab.0.center/1920.-9.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1618487121761" />
+    <state width="1899" height="282" key="GridCell.Tab.0.center/1920.-9.1920.1040/0.0.1920.1040@1920.-9.1920.1040" timestamp="1618449699623" />
+    <state width="1899" height="282" key="GridCell.Tab.0.left" timestamp="1618487121761">
+      <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="282" key="GridCell.Tab.0.left/1920.-9.1920.1040/0.0.1920.1040@1920.-9.1920.1040" timestamp="1618449014886" />
-    <state width="1899" height="282" key="GridCell.Tab.0.right" timestamp="1618449014887">
-      <screen x="1920" y="-9" width="1920" height="1040" />
+    <state width="1899" height="282" key="GridCell.Tab.0.left/1920.-9.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1618487121761" />
+    <state width="1899" height="282" key="GridCell.Tab.0.left/1920.-9.1920.1040/0.0.1920.1040@1920.-9.1920.1040" timestamp="1618449699623" />
+    <state width="1899" height="282" key="GridCell.Tab.0.right" timestamp="1618487121762">
+      <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="282" key="GridCell.Tab.0.right/1920.-9.1920.1040/0.0.1920.1040@1920.-9.1920.1040" timestamp="1618449014887" />
+    <state width="1899" height="282" key="GridCell.Tab.0.right/1920.-9.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1618487121762" />
+    <state width="1899" height="282" key="GridCell.Tab.0.right/1920.-9.1920.1040/0.0.1920.1040@1920.-9.1920.1040" timestamp="1618449699623" />
     <state x="461" y="162" key="SettingsEditor" timestamp="1618292846249">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -149,10 +177,15 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="209" y="5" width="1499" height="1027" maximized="true" key="dock-window-1/1920.-9.1920.1040/0.0.1920.1040@1920.-9.1920.1040" timestamp="1618368806137" />
-    <state x="2935" y="176" width="613" height="538" key="find.popup" timestamp="1618447880365">
+    <state x="2308" y="311" width="1499" height="1027" maximized="true" key="dock-window-2" timestamp="1618486124633">
       <screen x="1920" y="-9" width="1920" height="1040" />
     </state>
-    <state x="2935" y="176" width="613" height="538" key="find.popup/1920.-9.1920.1040/0.0.1920.1040@1920.-9.1920.1040" timestamp="1618447880365" />
+    <state x="2308" y="311" width="1499" height="1027" maximized="true" key="dock-window-2/1920.-9.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1618486124633" />
+    <state x="1015" y="185" width="799" height="538" key="find.popup" timestamp="1618486987239">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="1015" y="185" width="799" height="538" key="find.popup/1920.-9.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1618486987239" />
+    <state x="2935" y="176" width="613" height="538" key="find.popup/1920.-9.1920.1040/0.0.1920.1040@1920.-9.1920.1040" timestamp="1618449857464" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

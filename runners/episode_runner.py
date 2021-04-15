@@ -1,4 +1,3 @@
-#from envs import REGISTRY as env_REGISTRY
 from functools import partial
 from components.episode_buffer import EpisodeBatch
 import numpy as np
@@ -14,7 +13,7 @@ class EpisodeRunner:
         assert self.batch_size == 1
 
         self.env = env
-        self.episode_limit = 160
+        self.episode_limit = self.args.episode_limit
         self.t = 0
 
         self.t_env = 0
@@ -148,7 +147,7 @@ class EpisodeRunner:
         avail_actions = avail_actions_float
         data = dec.obs[0]
 
-        state = data[0, :45]
-        obs = data[0, 45:].reshape(self.args.n_agents, -1)
+        state = data[0, :self.args.state_shape]
+        obs = data[0, self.args.state_shape:].reshape(self.args.n_agents, -1)
 
         return state, obs, avail_actions

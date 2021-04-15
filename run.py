@@ -1,15 +1,17 @@
-import numpy as np
-from learners import REGISTRY as le_REGISTRY
 import os
 import time
-from mlagents_envs.environment import UnityEnvironment, ActionTuple
+from os.path import dirname, abspath
+from learners import REGISTRY as le_REGISTRY
+from runners import REGISTRY as r_REGISTRY
+from controller import REGISTRY as mac_REGISTRY
+from mlagents_envs.environment import UnityEnvironment
 from mlagents_envs.side_channel.engine_configuration_channel\
                              import EngineConfigurationChannel
 from types import SimpleNamespace as SN
 from components.transforms import OneHot
 from components.episode_buffer import ReplayBuffer
-from controller.basic_controller import BasicMAC
-from runners.episode_runner import EpisodeRunner
+from envs.env_info import get_env_info
+from envs.env_info import get_env_name
 from utils.logging import Logger
 from utils.timehelper import time_left, time_str
 import datetime
@@ -21,34 +23,41 @@ train_mode = True
 run_step = 50000 if train_mode else 0
 test_step = 10000
 
-env_name = 'PredatorPrey_Game/PredatorPrey'
 
-
-def runing(config, _log):
+def runing(config, _log, game_name):
     _config = args_sanity_check(config, _log)
     args = SN(**config)
     args.device = "cuda" if args.use_cuda else "cpu"
+
+    env_name = get_env_name(game_name)
 
     logger = Logger(_log)
     unique_token = "{}__{}".format(args.name, datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
     args.unique_token = unique_token
 
-    run_sequential(args, logger)
+    args.unique_token = unique_token
+    if args.use_tensorboard:
+        tb_logs_direc = os.path.join(dirname(dirname(abspath(__file__))), "results", "tb_logs/{}".format(game_name))
+        tb_exp_direc = os.path.join(tb_logs_direc, "{}").format(unique_token)
+        logger.setup_tb(tb_exp_direc)
+
+    run_sequential(args, logger, env_name)
 
 
-def run_sequential(args, logger):
+def run_sequential(args, logger, env_name):
     engine_configuration_channel = EngineConfigurationChannel()
-    env = UnityEnvironment(file_name=env_name,
+    env = UnityEnvironment(file_name="envs/{0}".format(env_name),
                            #    no_graphics=True,
                            side_channels=[engine_configuration_channel])
 
+    env_arg = get_env_info(env_name)
+    args.n_agents = env_arg["n_agents"]
+    args.n_actions = env_arg["n_actions"]
+    args.state_shape = env_arg["state_shape"]
+    args.obs_shape = env_arg["obs_shape"]
 
-    args.n_agents = 3
-    args.n_actions = 5
-    args.state_shape = 45
-    args.obs_shape = 45
-
-    episode_limit = 160
+    args.episode_limit = env_arg["episode_limit"]
+    runner = r_REGISTRY[args.runner](args=args, logger=logger, env=env)
 
     scheme = {
         "state": {"vshape": args.state_shape},
@@ -65,17 +74,48 @@ def run_sequential(args, logger):
         "actions": ("actions_onehot", [OneHot(out_dim=args.n_actions)])
     }
 
-    buffer = ReplayBuffer(scheme, groups, args.buffer_size, episode_limit + 1,
+    buffer = ReplayBuffer(scheme, groups, args.buffer_size, args.episode_limit + 1,
                           preprocess=preprocess,
                           device="cpu" if args.buffer_cpu_only else args.device)
 
-    mac = BasicMAC(buffer.scheme, groups, args)
-
-    runner = EpisodeRunner(args=args, logger=logger, env=env)
+    mac = mac_REGISTRY[args.mac](buffer.scheme, groups, args)
 
     runner.setup(scheme=scheme, groups=groups, preprocess=preprocess, mac=mac)
 
     learner = le_REGISTRY[args.learner](mac, buffer.scheme, logger, args)
+
+    if args.checkpoint_path != "":
+
+        timesteps = []
+        timestep_to_load = 0
+
+        if not os.path.isdir(args.checkpoint_path):
+            logger.console_logger.info("Checkpoint directiory {} doesn't exist".format(args.checkpoint_path))
+            return
+
+        # Go through all files in args.checkpoint_path
+        for name in os.listdir(args.checkpoint_path):
+            full_name = os.path.join(args.checkpoint_path, name)
+            # Check if they are dirs the names of which are numbers
+            if os.path.isdir(full_name) and name.isdigit():
+                timesteps.append(int(name))
+
+        if args.load_step == 0:
+            # choose the max timestep
+            timestep_to_load = max(timesteps)
+        else:
+            # choose the timestep closest to load_step
+            timestep_to_load = min(timesteps, key=lambda x: abs(x - args.load_step))
+
+        model_path = os.path.join(args.checkpoint_path, str(timestep_to_load))
+
+        logger.console_logger.info("Loading model from {}".format(model_path))
+        learner.load_models(model_path)
+        runner.t_env = timestep_to_load
+
+        if args.evaluate or args.save_replay:
+            evaluate_sequential(args, runner)
+            return
 
     episode = 0
     last_test_T = -args.test_interval - 1
@@ -154,3 +194,13 @@ def args_sanity_check(config, _log):
         config["test_nepisode"] = (config["test_nepisode"]//config["batch_size_run"]) * config["batch_size_run"]
 
     return config
+
+def evaluate_sequential(args, runner):
+
+    for _ in range(args.test_nepisode):
+        runner.run(test_mode=True)
+
+    if args.save_replay:
+        runner.save_replay()
+
+    runner.close_env()
