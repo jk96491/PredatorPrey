@@ -58,13 +58,13 @@ public class PlayAgent : Entity
         var hit = Physics.OverlapBox(
            targetPos, new Vector3(0.3f, 0.3f, 0.3f));
 
-        if (hit.Where(col => col.gameObject.CompareTag("Wall")).ToArray().Length != 0)
-            not_wall = false;
+      //  if (hit.Where(col => col.gameObject.CompareTag("Wall")).ToArray().Length != 0)
+      //      not_wall = false;
 
         if (hit.Where(col => col.gameObject.CompareTag("Agent")).ToArray().Length != 0)
             not_other_agent = false;
 
-        if (not_wall && not_other_agent)
+        if (not_other_agent)
             trans.position = targetPos;
     }
 }

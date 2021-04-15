@@ -45,8 +45,8 @@ def run_sequential(args, logger):
 
     args.n_agents = 3
     args.n_actions = 5
-    args.state_shape = 24
-    args.obs_shape = 40
+    args.state_shape = 45
+    args.obs_shape = 45
 
     episode_limit = 160
 
@@ -94,7 +94,7 @@ def run_sequential(args, logger):
     logger.console_logger.info("Beginning training for {} timesteps".format(args.t_max))
 
     while runner.t_env <= args.t_max:
-
+        engine_configuration_channel.set_configuration_parameters(time_scale=1.0)
         # Run for a whole episode at a time
         episode_batch = runner.run(test_mode=False)
         buffer.insert_episode_batch(episode_batch)
@@ -121,6 +121,7 @@ def run_sequential(args, logger):
             last_time = time.time()
 
             last_test_T = runner.t_env
+            engine_configuration_channel.set_configuration_parameters(time_scale=1.0)
             for _ in range(n_test_runs):
                 runner.run(test_mode=True)
 

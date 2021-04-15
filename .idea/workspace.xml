@@ -22,7 +22,7 @@
   </component>
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../SMAC/trunk" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../tgn-master" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RecentsManager">
@@ -116,31 +116,31 @@
     <servers />
   </component>
   <component name="WindowStateProjectService">
-    <state width="1468" height="466" key="DebuggerActiveHint" timestamp="1618381659243">
+    <state width="1468" height="466" key="DebuggerActiveHint" timestamp="1618448545510">
       <screen x="1920" y="-9" width="1920" height="1040" />
     </state>
-    <state width="1468" height="466" key="DebuggerActiveHint/1920.-9.1920.1040/0.0.1920.1040@1920.-9.1920.1040" timestamp="1618381659243" />
-    <state x="2660" y="252" key="FileChooserDialogImpl" timestamp="1618363123174">
-      <screen x="1920" y="-9" width="1920" height="1040" />
+    <state width="1468" height="466" key="DebuggerActiveHint/1920.-9.1920.1040/0.0.1920.1040@1920.-9.1920.1040" timestamp="1618448545510" />
+    <state x="579" y="256" key="FileChooserDialogImpl" timestamp="1618395485820">
+      <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="740" y="261" key="FileChooserDialogImpl/1920.-9.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1618293010585" />
-    <state x="2660" y="252" key="FileChooserDialogImpl/1920.-9.1920.1040/0.0.1920.1040@1920.-9.1920.1040" timestamp="1618363123174" />
-    <state width="1899" height="282" key="GridCell.Tab.0.bottom" timestamp="1618388063013">
+    <state x="579" y="256" key="FileChooserDialogImpl/1920.-9.1920.1040/0.0.1920.1040@1920.-9.1920.1040" timestamp="1618395485820" />
+    <state width="1899" height="282" key="GridCell.Tab.0.bottom" timestamp="1618448789573">
       <screen x="1920" y="-9" width="1920" height="1040" />
     </state>
-    <state width="1899" height="282" key="GridCell.Tab.0.bottom/1920.-9.1920.1040/0.0.1920.1040@1920.-9.1920.1040" timestamp="1618388063013" />
-    <state width="1899" height="282" key="GridCell.Tab.0.center" timestamp="1618388063013">
+    <state width="1899" height="282" key="GridCell.Tab.0.bottom/1920.-9.1920.1040/0.0.1920.1040@1920.-9.1920.1040" timestamp="1618448789573" />
+    <state width="1899" height="282" key="GridCell.Tab.0.center" timestamp="1618448789573">
       <screen x="1920" y="-9" width="1920" height="1040" />
     </state>
-    <state width="1899" height="282" key="GridCell.Tab.0.center/1920.-9.1920.1040/0.0.1920.1040@1920.-9.1920.1040" timestamp="1618388063013" />
-    <state width="1899" height="282" key="GridCell.Tab.0.left" timestamp="1618388063012">
+    <state width="1899" height="282" key="GridCell.Tab.0.center/1920.-9.1920.1040/0.0.1920.1040@1920.-9.1920.1040" timestamp="1618448789573" />
+    <state width="1899" height="282" key="GridCell.Tab.0.left" timestamp="1618448789572">
       <screen x="1920" y="-9" width="1920" height="1040" />
     </state>
-    <state width="1899" height="282" key="GridCell.Tab.0.left/1920.-9.1920.1040/0.0.1920.1040@1920.-9.1920.1040" timestamp="1618388063012" />
-    <state width="1899" height="282" key="GridCell.Tab.0.right" timestamp="1618388063013">
+    <state width="1899" height="282" key="GridCell.Tab.0.left/1920.-9.1920.1040/0.0.1920.1040@1920.-9.1920.1040" timestamp="1618448789572" />
+    <state width="1899" height="282" key="GridCell.Tab.0.right" timestamp="1618448789573">
       <screen x="1920" y="-9" width="1920" height="1040" />
     </state>
-    <state width="1899" height="282" key="GridCell.Tab.0.right/1920.-9.1920.1040/0.0.1920.1040@1920.-9.1920.1040" timestamp="1618388063013" />
+    <state width="1899" height="282" key="GridCell.Tab.0.right/1920.-9.1920.1040/0.0.1920.1040@1920.-9.1920.1040" timestamp="1618448789573" />
     <state x="461" y="162" key="SettingsEditor" timestamp="1618292846249">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -149,19 +149,14 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="209" y="5" width="1499" height="1027" maximized="true" key="dock-window-1/1920.-9.1920.1040/0.0.1920.1040@1920.-9.1920.1040" timestamp="1618368806137" />
-    <state x="2935" y="176" width="613" height="538" key="find.popup" timestamp="1618387705434">
+    <state x="2935" y="176" width="613" height="538" key="find.popup" timestamp="1618447880365">
       <screen x="1920" y="-9" width="1920" height="1040" />
     </state>
-    <state x="2935" y="176" width="613" height="538" key="find.popup/1920.-9.1920.1040/0.0.1920.1040@1920.-9.1920.1040" timestamp="1618387705434" />
+    <state x="2935" y="176" width="613" height="538" key="find.popup/1920.-9.1920.1040/0.0.1920.1040@1920.-9.1920.1040" timestamp="1618447880365" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/runners/episode_runner.py</url>
-          <line>113</line>
-          <option name="timeStamp" value="35" />
-        </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/learners/coma_learner.py</url>
           <line>32</line>

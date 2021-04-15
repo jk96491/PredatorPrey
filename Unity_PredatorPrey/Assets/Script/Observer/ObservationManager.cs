@@ -73,7 +73,6 @@ public class ObservationManager : MonoSingleton<ObservationManager>
             List<float> OwnInfo = GetObjectInfo(agents[index]);
             List<float> curAgentInfo = null;
             List<float> curGoalInfo = null;
-            //obsInfos.Add(OwnInfo);
 
             // Agent Á¤º¸
             for (int i = 0; i < agents.Count; i++)
@@ -83,7 +82,7 @@ public class ObservationManager : MonoSingleton<ObservationManager>
 
                 float dis = Utils.get_distance(agents[index].Trans, agents[i].Trans);
 
-                if(dis <= 5)
+                if(dis <= 8)
                 {
                     curAgentInfo = GetObjectInfo(agents[i]);
                     agent_count++;
@@ -99,7 +98,7 @@ public class ObservationManager : MonoSingleton<ObservationManager>
 
                 float dis = Utils.get_distance(agents[index].Trans, goals[i].Trans);
 
-                if (dis <= 5)
+                if (dis <= 8)
                 {
                     curGoalInfo = GetObjectInfo(goals[i]);
                     goal_count++;
@@ -114,6 +113,7 @@ public class ObservationManager : MonoSingleton<ObservationManager>
             {
                 List<float> emptyInfo = new List<float>();
 
+                emptyInfo.Add(1);
                 emptyInfo.Add(0);
                 emptyInfo.Add(0);
                 emptyInfo.Add(0);
@@ -131,6 +131,7 @@ public class ObservationManager : MonoSingleton<ObservationManager>
 
         if(!obj.IsActive)
         {
+            curInfo.Add(1);
             curInfo.Add(0);
             curInfo.Add(0);
             curInfo.Add(0);
@@ -142,21 +143,21 @@ public class ObservationManager : MonoSingleton<ObservationManager>
         if (obj.Type == Entity.Entity_Type.AGENT)
         {
             curInfo.Add(1);
+            curInfo.Add(1);
             curInfo.Add(0);
         }
         else
         {
+            curInfo.Add(1);
             curInfo.Add(0);
             curInfo.Add(1);
         }
 
         float posX = obj.Trans.position.x;
         float posZ = obj.Trans.position.z;
-
-        float dis = map_size;
-
-        curInfo.Add(posX / dis);
-        curInfo.Add(posZ / dis);
+        
+        curInfo.Add(posX / map_size);
+        curInfo.Add(posZ / map_size);
 
         return curInfo;
     }

@@ -53,13 +53,13 @@ class EpisodeRunner:
         self.reset()
 
         behavior_name = list(self.env.behavior_specs.keys())[0]
-        state, obs, avail_actions = self.get_env_info(behavior_name)
 
         terminated = False
         episode_return = 0
         self.mac.init_hidden(batch_size=self.batch_size)
 
         while not terminated:
+            state, obs, avail_actions = self.get_env_info_unity(behavior_name)
 
             pre_transition_data = {
                 "state": [state],
@@ -95,7 +95,7 @@ class EpisodeRunner:
 
             self.t += 1
 
-        state, obs, avail_actions = self.get_env_info(behavior_name)
+        state, obs, avail_actions = self.get_env_info_unity(behavior_name)
 
         last_data = {
             "state": [state],
@@ -140,7 +140,7 @@ class EpisodeRunner:
                 self.logger.log_stat(prefix + k + "_mean" , v/stats["n_episodes"], self.t_env)
         stats.clear()
 
-    def get_env_info(self, behavior_name):
+    def get_env_info_unity(self, behavior_name):
         dec, term = self.env.get_steps(behavior_name)
         avail_actions = np.array(dec.action_mask).squeeze(axis=1)
         avail_actions_float = np.zeros_like(avail_actions, dtype=np.float)
@@ -148,7 +148,7 @@ class EpisodeRunner:
         avail_actions = avail_actions_float
         data = dec.obs[0]
 
-        state = data[0, :24]
-        obs = data[0, 24:].reshape(self.args.n_agents, -1)
+        state = data[0, :45]
+        obs = data[0, 45:].reshape(self.args.n_agents, -1)
 
         return state, obs, avail_actions

@@ -170,7 +170,7 @@ public class Area : MonoBehaviour
                 if(dis < 0.5f && goals[goal_index].IsActive)
                 {
                     goals[goal_index].SetActive(false);
-                    agentManager.AddReward(1f);
+                    agentManager.AddReward(2f);
                 }
             }
         }
