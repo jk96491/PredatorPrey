@@ -24,7 +24,7 @@ Unity ML-Agent : ml-agents-release_12
 # 실행 방법 및 Unity Project
 PredatorPrey 환경은 main.py를 실행 하시면 됩니다.
 
-Unity 관련 코드 및 자료는 Unity_PredatorPrey에 있습니다. 
+Unity 관련 코드 및 자료는 Unity_PredatorPrey에 있습니다. 유니티에서 해당 경로로 프로젝트를 오픈 하면 됩니다.
 
 PredatorPrey게임 실행 파일은 envs/PredatorPrey_Game/PredatorPrey.exe 입니다.
 
