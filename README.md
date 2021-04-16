@@ -27,3 +27,8 @@ PredatorPrey 환경은 main.py를 실행 하시면 됩니다.
 Unity 관련 코드 및 자료는 Unity_PredatorPrey에 있습니다. 
 
 PredatorPrey게임 실행 파일은 envs/PredatorPrey_Game/PredatorPrey.exe 입니다.
+
+# 학습된 모델 사용
+config/default.yaml 에서 "checkpoint_path" 값을 
+
+checkpoint_path: "learning_results/models/QMIX" 이렇게 세팅 하시면 됩니다.
