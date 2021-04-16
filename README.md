@@ -31,7 +31,7 @@ PredatorPrey게임 실행 파일은 envs/PredatorPrey_Game/PredatorPrey.exe 입�
 # 학습된 모델 사용
 config/default.yaml 에서 "checkpoint_path" 값을 아래와 같이 세팅 하시면 됩니다.
  ```shell
-checkpoint_path: "learning_results/models/QMIX" 
+checkpoint_path: "learning_results/QMIX" 
 ```
 
 
