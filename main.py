@@ -9,6 +9,7 @@ from utils.logging import get_logger
 if __name__ == "__main__":
     algorithm = 'RNN_AGENT/qmix'
     game_name = "PredatorPrey"
+    run_unity_editor = True         # True -> 유니티와 직접 소통됨, False -> 빌드된 exe 파일과 소통됨
 
     config = cu.config_copy(cu.get_config(algorithm))
 
@@ -18,4 +19,4 @@ if __name__ == "__main__":
     torch.manual_seed(random_Seed)
 
     logger = get_logger()
-    runing(config, logger, game_name)
+    runing(config, logger, game_name, run_unity_editor)

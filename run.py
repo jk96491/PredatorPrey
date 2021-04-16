@@ -24,7 +24,7 @@ run_step = 50000 if train_mode else 0
 test_step = 10000
 
 
-def runing(config, _log, game_name):
+def runing(config, _log, game_name, run_unity_editor):
     _config = args_sanity_check(config, _log)
     args = SN(**config)
     args.device = "cuda" if args.use_cuda else "cpu"
@@ -41,12 +41,18 @@ def runing(config, _log, game_name):
         tb_exp_direc = os.path.join(tb_logs_direc, "{}").format(unique_token)
         logger.setup_tb(tb_exp_direc)
 
-    run_sequential(args, logger, env_name)
+    run_sequential(args, logger, env_name, run_unity_editor)
 
 
-def run_sequential(args, logger, env_name):
+def run_sequential(args, logger, env_name, run_unity_editor):
+
+    if run_unity_editor is not True:
+        env_dir_name = "envs/{0}".format(env_name)
+    else:
+        env_dir_name = None
+
     engine_configuration_channel = EngineConfigurationChannel()
-    env = UnityEnvironment(file_name="envs/{0}".format(env_name),
+    env = UnityEnvironment(file_name=env_dir_name,
                            #    no_graphics=True,
                            side_channels=[engine_configuration_channel])
 
