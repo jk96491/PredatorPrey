@@ -33,5 +33,8 @@ config/default.yaml 에서 "checkpoint_path" 값을 아래와 같이 세팅 하�
  ```shell
 checkpoint_path: "learning_results/QMIX" 
 ```
-
+처음부터 학습을 진행하고자 하시면 다음과 같이 세팅 하시면 됩니다.
+ ```shell
+checkpoint_path: "" 
+```
 
