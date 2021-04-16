@@ -18,7 +18,7 @@ import datetime
 import torch
 
 
-def runing(config, _log, game_name, run_unity_editor):
+def runing(config, _log, game_name):
     _config = args_sanity_check(config, _log)
     args = SN(**config)
     args.device = "cuda" if args.use_cuda else "cpu"
@@ -35,12 +35,12 @@ def runing(config, _log, game_name, run_unity_editor):
         tb_exp_direc = os.path.join(tb_logs_direc, "{}").format(unique_token)
         logger.setup_tb(tb_exp_direc)
 
-    run_sequential(args, logger, env_name, run_unity_editor)
+    run_sequential(args, logger, env_name)
 
 
-def run_sequential(args, logger, env_name, run_unity_editor):
+def run_sequential(args, logger, env_name):
     engine_configuration_channel = EngineConfigurationChannel()
-    env = UnityEnvironment(file_name="envs/{0}".format(env_name) if run_unity_editor is not True else None,
+    env = UnityEnvironment(file_name="envs/{0}".format(env_name) if args.run_unity_editor is not True else None,
                            #    no_graphics=True,
                            side_channels=[engine_configuration_channel])
 
