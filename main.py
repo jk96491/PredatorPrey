@@ -7,7 +7,7 @@ from utils.logging import get_logger
 
 
 if __name__ == "__main__":
-    algorithm = 'RNN_AGENT/coma'
+    algorithm = 'RNN_AGENT/qmix'
     game_name = "PredatorPrey"
 
     config = cu.config_copy(cu.get_config(algorithm))

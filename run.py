@@ -122,7 +122,7 @@ def run_sequential(args, logger, env_name):
     logger.console_logger.info("Beginning training for {} timesteps".format(args.t_max))
 
     while runner.t_env <= args.t_max:
-        engine_configuration_channel.set_configuration_parameters(time_scale=12.0)
+        engine_configuration_channel.set_configuration_parameters(time_scale=args.learning_time_scale)
         # Run for a whole episode at a time
         episode_batch = runner.run(test_mode=False)
         buffer.insert_episode_batch(episode_batch)
@@ -149,7 +149,7 @@ def run_sequential(args, logger, env_name):
             last_time = time.time()
 
             last_test_T = runner.t_env
-            engine_configuration_channel.set_configuration_parameters(time_scale=1.0)
+            engine_configuration_channel.set_configuration_parameters(time_scale=args.test_time_scale)
             for _ in range(n_test_runs):
                 runner.run(test_mode=True)
 
