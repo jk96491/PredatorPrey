@@ -45,14 +45,8 @@ def runing(config, _log, game_name, run_unity_editor):
 
 
 def run_sequential(args, logger, env_name, run_unity_editor):
-
-    if run_unity_editor is not True:
-        env_dir_name = "envs/{0}".format(env_name)
-    else:
-        env_dir_name = None
-
     engine_configuration_channel = EngineConfigurationChannel()
-    env = UnityEnvironment(file_name=env_dir_name,
+    env = UnityEnvironment(file_name="envs/{0}".format(env_name) if run_unity_editor is not True else None,
                            #    no_graphics=True,
                            side_channels=[engine_configuration_channel])
 
