@@ -17,12 +17,6 @@ from utils.timehelper import time_left, time_str
 import datetime
 import torch
 
-load_model = False
-train_mode = True
-
-run_step = 50000 if train_mode else 0
-test_step = 10000
-
 
 def runing(config, _log, game_name, run_unity_editor):
     _config = args_sanity_check(config, _log)
