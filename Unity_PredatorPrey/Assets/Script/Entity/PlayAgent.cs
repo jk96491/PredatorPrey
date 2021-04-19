@@ -96,7 +96,7 @@ public class PlayAgent : Agent
         if (hit.Where(col => col.gameObject.CompareTag("Agent")).ToArray().Length != 0)
             not_other_agent = false;
 
-        if (not_other_agent && not_wall)
+        if (not_other_agent)
             trans.position = targetPos;
     }
 

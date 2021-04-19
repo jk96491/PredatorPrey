@@ -39,12 +39,8 @@ def runing(config, _log, game_name):
 
 
 def run_sequential(args, logger, env_name):
-    engine_configuration_channel = EngineConfigurationChannel()
-    env = UnityEnvironment(file_name="envs/{0}".format(env_name) if args.run_unity_editor is not True else None,
-                           #    no_graphics=True,
-                           side_channels=[engine_configuration_channel])
+    env, env_arg, engine_configuration_channel = get_env_info(env_name, args)
 
-    env_arg = get_env_info(env_name)
     args.n_agents = env_arg["n_agents"]
     args.n_actions = env_arg["n_actions"]
     args.state_shape = env_arg["state_shape"]
