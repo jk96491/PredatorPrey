@@ -31,9 +31,6 @@ class EpisodeRunner:
                                  preprocess=preprocess, device=self.args.device)
         self.mac = mac
 
-    def get_env_info(self):
-        return self.env.get_env_info()
-
     def save_replay(self):
         self.env.save_replay()
 
@@ -51,14 +48,17 @@ class EpisodeRunner:
     def run(self, test_mode=False):
         self.reset()
 
-        behavior_name = list(self.env.behavior_specs.keys())[0]
+        behavior_name_list = list(self.env.behavior_specs.keys())
+
+        Coordinator = behavior_name_list[0]
+        Agents = behavior_name_list[1]
 
         terminated = False
         episode_return = 0
         self.mac.init_hidden(batch_size=self.batch_size)
 
         while not terminated:
-            state, obs, avail_actions = self.get_env_info_unity(behavior_name)
+            state, obs, avail_actions = self.get_env_info_unity(Coordinator, Agents)
 
             pre_transition_data = {
                 "state": [state],
@@ -75,10 +75,10 @@ class EpisodeRunner:
             detached_action = actions.detach().numpy()
             action_tuple = ActionTuple()
             action_tuple.add_discrete(detached_action)
-            self.env.set_actions(behavior_name, action_tuple)
+            self.env.set_actions(Coordinator, action_tuple)
             self.env.step()
 
-            dec, term = self.env.get_steps(behavior_name)
+            dec, term = self.env.get_steps(Coordinator)
             terminated = len(term.agent_id) > 0
             reward = term.reward if terminated else dec.reward
 
@@ -94,7 +94,7 @@ class EpisodeRunner:
 
             self.t += 1
 
-        state, obs, avail_actions = self.get_env_info_unity(behavior_name)
+        state, obs, avail_actions = self.get_env_info_unity(Coordinator, Agents)
 
         last_data = {
             "state": [state],
@@ -139,15 +139,15 @@ class EpisodeRunner:
                 self.logger.log_stat(prefix + k + "_mean" , v/stats["n_episodes"], self.t_env)
         stats.clear()
 
-    def get_env_info_unity(self, behavior_name):
-        dec, term = self.env.get_steps(behavior_name)
+    def get_env_info_unity(self, Coordinator, Agents):
+        dec, term = self.env.get_steps(Agents)
+        obs = dec.obs[0].reshape(self.args.n_agents, -1)
+
+        dec, term = self.env.get_steps(Coordinator)
         avail_actions = np.array(dec.action_mask).squeeze(axis=1)
         avail_actions_float = np.zeros_like(avail_actions, dtype=np.float)
         avail_actions_float[avail_actions == False] = 1
-        avail_actions = avail_actions_float
-        data = dec.obs[0]
-
-        state = data[0, :self.args.state_shape]
-        obs = data[0, self.args.state_shape:].reshape(self.args.n_agents, -1)
+        avail_actions = avail_actions_float.tolist()
+        state = dec.obs[0]
 
         return state, obs, avail_actions

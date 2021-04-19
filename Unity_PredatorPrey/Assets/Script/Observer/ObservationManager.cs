@@ -58,7 +58,69 @@ public class ObservationManager : MonoSingleton<ObservationManager>
         }
     }
 
-    public void CollectObservation()
+    public List<float> CollectObservation(int index_)
+    {
+        if (null == agents[index_])
+            return null;
+
+        int agent_count = 0;
+        int goal_count = 0;
+
+        List<float> obsInfo = GetObjectInfo(agents[index_]);
+        List<float> curAgentInfo = null;
+        List<float> curGoalInfo = null;
+
+        // Agent 정보
+        for (int i = 0; i < agents.Count; i++)
+        {
+            if (i == index_)
+                continue;
+
+            float dis = Utils.get_distance(agents[index_].Trans, agents[i].Trans);
+
+            if (dis <= 8)
+            {
+                curAgentInfo = GetObjectInfo(agents[i]);
+                agent_count++;
+                obsInfo.AddRange(curAgentInfo);
+            }
+        }
+
+        // Goal 정보
+        for (int i = 0; i < goals.Count; i++)
+        {
+            if (i == index_)
+                continue;
+
+            float dis = Utils.get_distance(agents[index_].Trans, goals[i].Trans);
+
+            if (dis <= 8)
+            {
+                curGoalInfo = GetObjectInfo(goals[i]);
+                goal_count++;
+                obsInfo.AddRange(curGoalInfo);
+            }
+        }
+
+        int agent_remain = (agents.Count - 1) - agent_count;
+        int goal_remain = goals.Count - goal_count;
+
+        for (int i = 0; i < agent_remain + goal_remain; i++)
+        {
+            List<float> emptyInfo = new List<float>();
+
+            emptyInfo.Add(1);
+            emptyInfo.Add(0);
+            emptyInfo.Add(0);
+            emptyInfo.Add(0);
+            emptyInfo.Add(0);
+            obsInfo.AddRange(emptyInfo);
+        }
+
+        return obsInfo;
+    }
+
+    public void CollectAllObservation()
     {
         if (null == obsInfos)
             obsInfos = new List<List<float>>();
@@ -67,61 +129,9 @@ public class ObservationManager : MonoSingleton<ObservationManager>
 
         for (int index = 0; index < agents.Count; index++)
         {
-            int agent_count = 0;
-            int goal_count = 0;
+            List<float> curObsInfo = CollectObservation(index);
 
-            List<float> OwnInfo = GetObjectInfo(agents[index]);
-            List<float> curAgentInfo = null;
-            List<float> curGoalInfo = null;
-
-            // Agent 정보
-            for (int i = 0; i < agents.Count; i++)
-            {
-                if (i == index)
-                    continue;
-
-                float dis = Utils.get_distance(agents[index].Trans, agents[i].Trans);
-
-                if(dis <= 8)
-                {
-                    curAgentInfo = GetObjectInfo(agents[i]);
-                    agent_count++;
-                    OwnInfo.AddRange(curAgentInfo);
-                }
-            }
-
-            // Goal 정보
-            for (int i = 0; i < goals.Count; i++)
-            {
-                if (i == index)
-                    continue;
-
-                float dis = Utils.get_distance(agents[index].Trans, goals[i].Trans);
-
-                if (dis <= 8)
-                {
-                    curGoalInfo = GetObjectInfo(goals[i]);
-                    goal_count++;
-                    OwnInfo.AddRange(curGoalInfo);
-                }
-            }
-
-            int agent_remain = (agents.Count - 1) - agent_count;
-            int goal_remain = goals.Count - goal_count;   
-
-            for (int i = 0; i < agent_remain + goal_remain; i++)
-            {
-                List<float> emptyInfo = new List<float>();
-
-                emptyInfo.Add(1);
-                emptyInfo.Add(0);
-                emptyInfo.Add(0);
-                emptyInfo.Add(0);
-                emptyInfo.Add(0);
-                OwnInfo.AddRange(emptyInfo);
-            }
-
-            obsInfos.Add(OwnInfo);
+            obsInfos.Add(curObsInfo);
         }
     }
 
@@ -156,6 +166,43 @@ public class ObservationManager : MonoSingleton<ObservationManager>
         float posX = obj.Trans.position.x;
         float posZ = obj.Trans.position.z;
         
+        curInfo.Add(posX / map_size);
+        curInfo.Add(posZ / map_size);
+
+        return curInfo;
+    }
+
+    public List<float> GetObjectInfo(PlayAgent obj)
+    {
+        List<float> curInfo = new List<float>();
+
+        if (!obj.IsActive)
+        {
+            curInfo.Add(1);
+            curInfo.Add(0);
+            curInfo.Add(0);
+            curInfo.Add(0);
+            curInfo.Add(0);
+
+            return curInfo;
+        }
+
+        if (obj.Type == Entity.Entity_Type.AGENT)
+        {
+            curInfo.Add(1);
+            curInfo.Add(1);
+            curInfo.Add(0);
+        }
+        else
+        {
+            curInfo.Add(1);
+            curInfo.Add(0);
+            curInfo.Add(1);
+        }
+
+        float posX = obj.Trans.position.x;
+        float posZ = obj.Trans.position.z;
+
         curInfo.Add(posX / map_size);
         curInfo.Add(posZ / map_size);
 

@@ -19,13 +19,17 @@ public class Entity : MonoBehaviour
 
     protected bool isActive = false;
     public bool IsActive { get { return this.isActive; } }
+    
+    protected int index = 0;
+    public int Index { get { return index; } }
 
-    public virtual void Init()
+    public virtual void Init(int index_ = -1)
     {
         type = Entity_Type.NONE;
         trans = gameObject.transform;
 
         isActive = false;
+        index = index_;
     }
 
     public virtual void SetPostion(int x, int z)

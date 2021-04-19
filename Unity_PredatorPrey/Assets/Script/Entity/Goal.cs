@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class Goal : Entity
 {
-    public override void Init()
+    public override void Init(int index_ = -1)
     {
-        base.Init();
+        base.Init(index_);
         this.type = Entity_Type.GOAL;
     }
 

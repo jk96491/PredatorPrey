@@ -135,6 +135,7 @@ GameObject:
   - component: {fileID: 13522629}
   - component: {fileID: 13522630}
   - component: {fileID: 13522631}
+  - component: {fileID: 13522632}
   m_Layer: 0
   m_Name: AgentManager
   m_TagString: Untagged
@@ -173,7 +174,6 @@ MonoBehaviour:
   hasUpgradedFromAgentParameters: 1
   MaxStep: 160
   agents: []
-  timeBetweenDecisionsAtInference: 5
 --- !u!114 &13522631
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -187,7 +187,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 180
+    VectorObservationSize: 45
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 0
@@ -199,11 +199,25 @@ MonoBehaviour:
   m_Model: {fileID: 0}
   m_InferenceDevice: 0
   m_BehaviorType: 0
-  m_BehaviorName: My Behavior
+  m_BehaviorName: Coordinator
   TeamId: 0
   m_UseChildSensors: 1
   m_UseChildActuators: 1
   m_ObservableAttributeHandling: 0
+--- !u!114 &13522632
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 13522628}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a5c9d521e5ef4759a8246a07d52221e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  DecisionPeriod: 1
+  TakeActionsBetweenDecisions: 1
 --- !u!1 &88776969
 GameObject:
   m_ObjectHideFlags: 0

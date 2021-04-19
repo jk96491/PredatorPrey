@@ -63,7 +63,8 @@ public class Area : MonoBehaviour
 
             if (null != agentIns)
             {
-                agentIns.Init();
+                agentIns.Initialize();
+                agentIns.Init(i);
                 agentList.Add(agentIns);
             }
         }
