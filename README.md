@@ -6,7 +6,7 @@ ML-Agent를 이용하여 유니티 기반의 MARL 프레임웍을 제공합니�
 
 Unity 기반의 MARL 환경 제작이 필요하신분께 큰 도움이 되기를 바랍니다.~
 
-<img src="https://user-images.githubusercontent.com/17878413/115187865-fe272080-a11e-11eb-9fbd-5c9f3c7b9142.gif" width="40%"></img>
+<img src="https://user-images.githubusercontent.com/17878413/115187865-fe272080-a11e-11eb-9fbd-5c9f3c7b9142.gif" width="60%"></img>
 
 
 # 환경 설정 방법 및 요구 사양
