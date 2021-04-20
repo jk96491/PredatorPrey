@@ -45,7 +45,7 @@ obs_last_action: True # Include the agent's last action (one_hot) in the observa
 
 device_num: 0
 
-run_unity_editor: True
+run_unity_editor: False
 
 learning_time_scale: 12.0
 

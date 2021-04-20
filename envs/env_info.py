@@ -22,12 +22,12 @@ def get_env_info(env_name, args):
     dec, _ = env.get_steps(behavior_name_list[1])  # Agent
     obs = dec.obs[0]
 
-    env_arg = {}
-    env_arg["n_agents"] = dec.action_mask[0].shape[0]
-    env_arg["n_actions"] = dec.action_mask[0].shape[1]
-    env_arg["state_shape"] = state.shape[1]
-    env_arg["obs_shape"] = obs.shape[1]
-
-    env_arg["episode_limit"] = 160
+    env_arg = {
+        "n_agents": dec.action_mask[0].shape[0],
+        "n_actions": dec.action_mask[0].shape[1],
+        "state_shape": state.shape[1],
+        "obs_shape": obs.shape[1],
+        "episode_limit": 160
+    }
 
     return env, env_arg, engine_configuration_channel
