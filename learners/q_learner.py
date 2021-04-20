@@ -6,13 +6,14 @@ import torch as th
 from torch.optim import RMSprop
 
 
+# Q 러닝 계열의 coordinator 역할을 담당합니다.
 class QLearner:
     def __init__(self, mac, scheme, logger, args):
         self.args = args
         self.mac = mac
         self.logger = logger
 
-        self.params = list(mac.parameters())
+        self.params = list(mac.parameters())    # agent들의 신경망을 등록합니다.
 
         self.last_target_update_episode = 0
 
@@ -24,7 +25,7 @@ class QLearner:
                 self.mixer = QMixer(args)
             else:
                 raise ValueError("Mixer {} not recognised.".format(args.mixer))
-            self.params += list(self.mixer.parameters())
+            self.params += list(self.mixer.parameters())    # mixing network의 신경망을 추가 등록 합니다.
             self.target_mixer = copy.deepcopy(self.mixer)
 
         self.optimiser = RMSprop(params=self.params, lr=args.lr, alpha=args.optim_alpha, eps=args.optim_eps)
@@ -34,7 +35,7 @@ class QLearner:
         self.log_stats_t = -self.args.learner_log_interval - 1
 
     def train(self, batch: EpisodeBatch, t_env: int, episode_num: int):
-        # Get the relevant quantities
+        # 학습에 필요한 정보들을 정리 합니다.
         rewards = batch["reward"][:, :-1]
         actions = batch["actions"][:, :-1]
         terminated = batch["terminated"][:, :-1].float()
@@ -42,40 +43,31 @@ class QLearner:
         mask[:, 1:] = mask[:, 1:] * (1 - terminated[:, :-1])
         avail_actions = batch["avail_actions"]
 
-        # Calculate estimated Q-Values
+        # agent 개개인의 Q 값을 산출 합니다.
         mac_out = []
-        hidden_states = []
         self.mac.init_hidden(batch.batch_size)
         for t in range(batch.max_seq_length):
             agent_outs = self.mac.forward(batch, t=t)
             mac_out.append(agent_outs)
-            hidden_states.append(self.mac.hidden_states.view(batch.batch_size, self.args.n_agents, -1))
+        mac_out = th.stack(mac_out, dim=1)  # 시간 순에 따라 Concat 합니다.
 
-        mac_out = th.stack(mac_out, dim=1)  # Concat over time
-        hidden_states = th.stack(hidden_states, dim=1)
+        # agent가 수행한 action에 대한 Q 값을 가져 옵니다.
+        chosen_action_qvals = th.gather(mac_out[:, :-1], dim=3, index=actions).squeeze(3)  # 마지막 차원을 제거함.
 
-        # Pick the Q-Values for the actions taken by each agent
-        chosen_action_qvals = th.gather(mac_out[:, :-1], dim=3, index=actions).squeeze(3)  # Remove the last dim
-
-        # Calculate the Q-Values necessary for the target
+        # agent 개개인의 target network의 Q 값을 산출 합니다
         target_mac_out = []
-        target_hidden_states = []
         self.target_mac.init_hidden(batch.batch_size)
         for t in range(batch.max_seq_length):
             target_agent_outs = self.target_mac.forward(batch, t=t)
             target_mac_out.append(target_agent_outs)
-            target_hidden_states.append(self.target_mac.hidden_states.view(batch.batch_size, self.args.n_agents, -1))
 
-        # We don't need the first timesteps Q-Value estimate for calculating targets
-        target_mac_out = th.stack(target_mac_out[1:], dim=1)  # Concat across time
-        target_hidden_states = th.stack(target_hidden_states[1:], dim=1)
+        # 첫번째 step의 target network의 Q 값은 필요없습니다.
+        target_mac_out = th.stack(target_mac_out[1:], dim=1)  # 시간 순에 따라 Concat 합니다.
 
-        # Mask out unavailable actions
+        # 수행 불가능한 action을 masking 합니다.
         target_mac_out[avail_actions[:, 1:] == 0] = -9999999
 
-        # Max over target Q-Values
         if self.args.double_q:
-            # Get actions that maximise live Q (for double q-learning)
             mac_out_detach = mac_out.clone().detach()
             mac_out_detach[avail_actions == 0] = -9999999
             cur_max_actions = mac_out_detach[:, 1:].max(dim=3, keepdim=True)[1]
@@ -83,95 +75,31 @@ class QLearner:
         else:
             target_max_qvals = target_mac_out.max(dim=3)[0]
 
-        if self.args.mixer == 'graphmix':
+        # Q-tot과 target mixing network의 Q-tot를 산출합니다.
+        if self.mixer is not None:
+            chosen_action_qvals = self.mixer(chosen_action_qvals, batch["state"][:, :-1])
+            target_max_qvals = self.target_mixer(target_max_qvals, batch["state"][:, 1:])
 
-            # Mix
-            chosen_action_qvals_peragent = chosen_action_qvals.clone()
-            target_max_qvals_peragent = target_max_qvals.detach()
+        # mixing network를 위한 loss를 산출 합니다.
+        targets = rewards + self.args.gamma * (1 - terminated) * target_max_qvals
+        td_error = (chosen_action_qvals - targets.detach())
+        mask = mask.expand_as(td_error)
+        masked_td_error = td_error * mask
+        loss = (masked_td_error ** 2).sum() / mask.sum()
 
-            chosen_action_qvals, local_rewards, alive_agents_mask = self.mixer(chosen_action_qvals,
-                                                                               batch["state"][:, :-1],
-                                                                               agent_obs=batch["obs"][:, :-1],
-                                                                               team_rewards=rewards,
-                                                                               hidden_states=hidden_states[:, :-1]
-                                                                               )
-
-            target_max_qvals = self.target_mixer(target_max_qvals,
-                                                 batch["state"][:, 1:],
-                                                 agent_obs=batch["obs"][:, 1:],
-                                                 hidden_states=target_hidden_states
-                                                 )[0]
-
-            ## Global loss
-            # Calculate 1-step Q-Learning targets
-            targets = rewards + self.args.gamma * (1 - terminated) * target_max_qvals
-
-            # Td-error
-            td_error = (chosen_action_qvals - targets.detach())
-
-            mask = mask.expand_as(td_error)
-
-            # 0-out the targets that came from padded data
-            masked_td_error = td_error * mask
-
-            # Normal L2 loss, take mean over actual data
-            global_loss = (masked_td_error ** 2).sum() / mask.sum()
-
-            ## Local losses
-            # Calculate 1-step Q-Learning targets
-            local_targets = local_rewards + self.args.gamma * (1 - terminated).repeat(1, 1, self.args.n_agents) \
-                            * target_max_qvals_peragent
-
-            # Td-error
-            local_td_error = (chosen_action_qvals_peragent - local_targets)
-            local_mask = mask.repeat(1, 1, self.args.n_agents) * alive_agents_mask.float()
-
-            # 0-out the targets that came from padded data
-            local_masked_td_error = local_td_error * local_mask
-
-            # Normal L2 loss, take mean over actual data
-            local_loss = (local_masked_td_error ** 2).sum() / mask.sum()
-
-            # total loss
-            lambda_local = self.args.lambda_local
-            loss = global_loss + lambda_local * local_loss
-
-        else:
-            # Mix
-            if self.mixer is not None:
-                chosen_action_qvals = self.mixer(chosen_action_qvals, batch["state"][:, :-1])
-                target_max_qvals = self.target_mixer(target_max_qvals, batch["state"][:, 1:])
-
-            # Calculate 1-step Q-Learning targets
-            targets = rewards + self.args.gamma * (1 - terminated) * target_max_qvals
-
-            # Td-error
-            td_error = (chosen_action_qvals - targets.detach())
-
-            mask = mask.expand_as(td_error)
-
-            # 0-out the targets that came from padded data
-            masked_td_error = td_error * mask
-
-            # Normal L2 loss, take mean over actual data
-            loss = (masked_td_error ** 2).sum() / mask.sum()
-
-        # Optimise
+        # 역전파를 수행하여 mixing network 및 agent 모두의 가중치들을 갱신합니다.
         self.optimiser.zero_grad()
         loss.backward()
         grad_norm = th.nn.utils.clip_grad_norm_(self.params, self.args.grad_norm_clip)
         self.optimiser.step()
 
+        # 일정 주기마다 target network를 업데이트 합니다.
         if (episode_num - self.last_target_update_episode) / self.args.target_update_interval >= 1.0:
             self._update_targets()
             self.last_target_update_episode = episode_num
 
         if t_env - self.log_stats_t >= self.args.learner_log_interval:
             self.logger.log_stat("loss", loss.item(), t_env)
-
-            if self.args.mixer == 'graphmix':
-                self.logger.log_stat("global_loss", global_loss.item(), t_env)
-                self.logger.log_stat("local_loss", local_loss.item(), t_env)
 
             self.logger.log_stat("grad_norm", grad_norm, t_env)
             mask_elems = mask.sum().item()
