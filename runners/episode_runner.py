@@ -4,6 +4,7 @@ import numpy as np
 from mlagents_envs.environment import ActionTuple
 
 
+# 이 부분은 유니티 환경과 파이썬의 소통을 통한 환경 수행을 담당합니다.
 class EpisodeRunner:
 
     def __init__(self, args, logger, env):
@@ -23,7 +24,6 @@ class EpisodeRunner:
         self.train_stats = {}
         self.test_stats = {}
 
-        # Log the first run
         self.log_train_stats_t = -1000000
 
     def setup(self, scheme, groups, preprocess, mac):
@@ -34,11 +34,13 @@ class EpisodeRunner:
     def close_env(self):
         self.env.close()
 
+    # 환경을 reset 합니다.
     def reset(self):
         self.batch = self.new_batch()
         self.env.reset()
         self.t = 0
 
+    # 환경을 수행 합니다.
     def run(self, test_mode=False):
         self.reset()
 
@@ -49,7 +51,7 @@ class EpisodeRunner:
 
         terminated = False
         episode_return = 0
-        self.mac.init_hidden(batch_size=self.batch_size)
+        self.mac.init_hidden(batch_size=self.batch_size)    # agent의 history(trajectory) 정보를 초기화 합니다.
 
         while not terminated:
             state, obs, avail_actions = self.get_env_info_unity(Coordinator, Agents)
@@ -62,8 +64,7 @@ class EpisodeRunner:
 
             self.batch.update(pre_transition_data, ts=self.t)
 
-            # Pass the entire batch of experiences up till now to the agents
-            # Receive the actions for each agent at this timestep in a batch of size 1
+            # 지금까지 발생한 정보들을 agent에게 전달합니다.
             actions = self.mac.select_actions(self.batch, t_ep=self.t, t_env=self.t_env, test_mode=test_mode)
 
             detached_action = actions.detach().numpy()
@@ -132,6 +133,7 @@ class EpisodeRunner:
                 self.logger.log_stat(prefix + k + "_mean" , v/stats["n_episodes"], self.t_env)
         stats.clear()
 
+    # 현재 시점의 state, obs, avail_actions 정보들을 환경으로부터 가져 옵니다.
     def get_env_info_unity(self, Coordinator, Agents):
         dec, term = self.env.get_steps(Agents)
         obs = dec.obs[0].reshape(self.args.n_agents, -1)
