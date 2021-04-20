@@ -119,14 +119,13 @@ def run_sequential(args, logger, env_name):
 
     while runner.t_env <= args.t_max:
         engine_configuration_channel.set_configuration_parameters(time_scale=args.learning_time_scale)
-        # Run for a whole episode at a time
+
         episode_batch = runner.run(test_mode=False)
         buffer.insert_episode_batch(episode_batch)
 
         if buffer.can_sample(args.batch_size):
             episode_sample = buffer.sample(args.batch_size)
 
-            # Truncate batch to only filled timesteps
             max_ep_t = episode_sample.max_t_filled()
             episode_sample = episode_sample[:, :max_ep_t]
 
@@ -135,7 +134,6 @@ def run_sequential(args, logger, env_name):
 
             learner.train(episode_sample, runner.t_env, episode)
 
-        # Execute test runs once in a while
         n_test_runs = max(1, args.test_nepisode // runner.batch_size)
         if (runner.t_env - last_test_T) / args.test_interval >= 1.0:
 
