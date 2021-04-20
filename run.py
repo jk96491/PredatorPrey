@@ -4,9 +4,6 @@ from os.path import dirname, abspath
 from learners import REGISTRY as le_REGISTRY
 from runners import REGISTRY as r_REGISTRY
 from controller import REGISTRY as mac_REGISTRY
-from mlagents_envs.environment import UnityEnvironment
-from mlagents_envs.side_channel.engine_configuration_channel\
-                             import EngineConfigurationChannel
 from types import SimpleNamespace as SN
 from components.transforms import OneHot
 from components.episode_buffer import ReplayBuffer
@@ -108,12 +105,9 @@ def train(args, logger, learner, runner, buffer, engine_configuration_channel):
         if args.save_model and (runner.t_env - model_save_time >= args.save_model_interval or model_save_time == 0):
             model_save_time = runner.t_env
             save_path = os.path.join(args.local_results_path, "models", args.unique_token, str(runner.t_env))
-            #"results/models/{}".format(unique_token)
             os.makedirs(save_path, exist_ok=True)
             logger.console_logger.info("Saving models to {}".format(save_path))
 
-            # learner should handle saving/loading -- delegate actor save/load to mac,
-            # use appropriate filenames to do critics, optimizer states
             learner.save_models(save_path)
 
         episode += args.batch_size_run
