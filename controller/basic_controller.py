@@ -2,8 +2,7 @@ from Agent.rnn_agent import RNNAgent
 from components.action_selectors import REGISTRY as action_REGISTRY
 import torch as th
 
-
-# This multi-agent controller shares parameters between agents
+# 이 부분은 멀티 에이전트에 대한 조정 기능을 담당하며 가중치들을 서로 공유 합니다.
 class BasicMAC:
     def __init__(self, scheme, groups, args):
         self.n_agents = args.n_agents
@@ -16,43 +15,45 @@ class BasicMAC:
 
         self.hidden_states = None
 
+    # t_ep 시점에서의 action 을 결정 합니다.
     def select_actions(self, ep_batch, t_ep, t_env, bs=slice(None), test_mode=False):
-        # Only select actions for the selected batch elements in bs
         avail_actions = ep_batch["avail_actions"][:, t_ep]
         agent_outputs = self.forward(ep_batch, t_ep, test_mode=test_mode)
         chosen_actions = self.action_selector.select_action(agent_outputs[bs], avail_actions[bs], t_env, test_mode=test_mode)
         return chosen_actions
 
+    # 순전파 함수로써 agent의 Q 혹은 Policy를 산출 합니다.
     def forward(self, ep_batch, t, test_mode=False):
         agent_inputs = self._build_inputs(ep_batch, t)
         avail_actions = ep_batch["avail_actions"][:, t]
+
+        # hidden_states는 agent의 history(trajectory) 정보 입니다.
         agent_outs, self.hidden_states = self.agent(agent_inputs, self.hidden_states)
 
-        # Softmax the agent outputs if they're policy logits
+        # agent의 output이 policy라면 Softmax를 사용합니다.
         if self.agent_output_type == "pi_logits":
 
             if getattr(self.args, "mask_before_softmax", True):
-                # Make the logits for unavailable actions very negative to minimise their affect on the softmax
+                # 수행 불가능한 행동에 대한 값을 아주 부정적으로 만들어 줍니다. 이렇게 하면 softmax의 부정적인 영향을 덜 수 있습니다.
                 reshaped_avail_actions = avail_actions.reshape(ep_batch.batch_size * self.n_agents, -1)
                 agent_outs[reshaped_avail_actions == 0] = -1e10
 
             agent_outs = th.nn.functional.softmax(agent_outs, dim=-1)
+
             if not test_mode:
-                # Epsilon floor
                 epsilon_action_num = agent_outs.size(-1)
                 if getattr(self.args, "mask_before_softmax", True):
-                    # With probability epsilon, we will pick an available action uniformly
                     epsilon_action_num = reshaped_avail_actions.sum(dim=1, keepdim=True).float()
 
                 agent_outs = ((1 - self.action_selector.epsilon) * agent_outs
                                + th.ones_like(agent_outs) * self.action_selector.epsilon/epsilon_action_num)
 
                 if getattr(self.args, "mask_before_softmax", True):
-                    # Zero out the unavailable actions
                     agent_outs[reshaped_avail_actions == 0] = 0.0
 
         return agent_outs.view(ep_batch.batch_size, self.n_agents, -1)
 
+    # agent의 history(trajectory) 정보를 초기화 합니다.
     def init_hidden(self, batch_size):
         if self.args.agent == "G2ANet":
             self.hidden_states = self.agent.init_hidden().expand(batch_size, self.n_agents, -1)
@@ -77,12 +78,12 @@ class BasicMAC:
     def _build_agents(self, input_shape):
         self.agent = RNNAgent(input_shape, self.args)
 
+    # batch로 부터 agent 신경망의 input값을 뽑아 냅니다.
     def _build_inputs(self, batch, t):
-        # Assumes homogenous agents with flat observations.
-        # Other MACs might want to e.g. delegate building inputs to each agent
         bs = batch.batch_size
         inputs = []
         inputs.append(batch["obs"][:, t])  # b1av
+
         if self.args.obs_last_action:
             if t == 0:
                 inputs.append(th.zeros_like(batch["actions_onehot"][:, t]))
@@ -94,6 +95,7 @@ class BasicMAC:
         inputs = th.cat([x.reshape(bs*self.n_agents, -1) for x in inputs], dim=1)
         return inputs
 
+    # agent 신경망의 input값 크기를 산출 합니다.
     def _get_input_shape(self, scheme):
         input_shape = scheme["obs"]["vshape"]
         if self.args.obs_last_action:
