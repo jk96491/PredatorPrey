@@ -16,28 +16,35 @@ import torch
 
 
 def runing(config, _log, game_name):
+
+    # config 파일로 부터 args 정보를 로드 합니다.
     _config = args_sanity_check(config, _log)
     args = SN(**config)
     args.device = "cuda" if args.use_cuda else "cpu"
 
     env_name = get_env_name(game_name)
 
+    # log 기능을 활성화 합니다.
     logger = Logger(_log)
     unique_token = "{}__{}".format(args.name, datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
     args.unique_token = unique_token
 
+    # 텐서보드 기능을 준비 합니다.
     args.unique_token = unique_token
     if args.use_tensorboard:
         tb_logs_direc = os.path.join(dirname(dirname(abspath(__file__))), "results", "tb_logs/{}".format(game_name))
         tb_exp_direc = os.path.join(tb_logs_direc, "{}").format(unique_token)
         logger.setup_tb(tb_exp_direc)
 
+    # 실험을 시작 합니다.
     run_sequential(args, logger, env_name)
 
 
 def run_sequential(args, logger, env_name):
+    # 환경의 여러가지 정보들을 가져 옵니다.
     env, env_arg, engine_configuration_channel = get_env_info(env_name, args)
 
+    # 가져온 환경 정보를 args에 세팅 합니다.
     args.n_agents = env_arg["n_agents"]
     args.n_actions = env_arg["n_actions"]
     args.state_shape = env_arg["state_shape"]
@@ -46,11 +53,13 @@ def run_sequential(args, logger, env_name):
 
     runner = r_REGISTRY[args.runner](args=args, logger=logger, env=env)
 
+    # 환경에서 발생한 정보를 저장하기 위한 ReplayBuffer를 초기화 합니다.
     scheme, groups, preprocess = get_data_infos(args)
     buffer = ReplayBuffer(scheme, groups, args.buffer_size, args.episode_limit + 1,
                           preprocess=preprocess,
                           device="cpu" if args.buffer_cpu_only else args.device)
 
+    # agent 및 coordinator 모두 초기화 합니다.
     mac = mac_REGISTRY[args.mac](buffer.scheme, groups, args)
     runner.setup(scheme=scheme, groups=groups, preprocess=preprocess, mac=mac)
     learner = le_REGISTRY[args.learner](mac, buffer.scheme, logger, args)
@@ -58,6 +67,7 @@ def run_sequential(args, logger, env_name):
     if is_set_checkpoint(args, logger, learner, runner) is True:
         return
 
+    # 학습을 수행 합니다.
     train(args, logger,learner, runner, buffer, engine_configuration_channel)
 
 
@@ -87,9 +97,12 @@ def train(args, logger, learner, runner, buffer, engine_configuration_channel):
             if episode_sample.device != args.device:
                 episode_sample.to(args.device)
 
+            # coordinator를 학습 합니다.
             learner.train(episode_sample, runner.t_env, episode)
 
         n_test_runs = max(1, args.test_nepisode // runner.batch_size)
+
+        # 일정 주기로 Test를 진행 합니다.
         if (runner.t_env - last_test_T) / args.test_interval >= 1.0:
 
             logger.console_logger.info("t_env: {} / {}".format(runner.t_env, args.t_max))
@@ -102,6 +115,7 @@ def train(args, logger, learner, runner, buffer, engine_configuration_channel):
             for _ in range(n_test_runs):
                 runner.run(test_mode=True)
 
+        # 일정 주기로 학습된 가중치를 저장 합니다.
         if args.save_model and (runner.t_env - model_save_time >= args.save_model_interval or model_save_time == 0):
             model_save_time = runner.t_env
             save_path = os.path.join(args.local_results_path, "models", args.unique_token, str(runner.t_env))
@@ -121,6 +135,7 @@ def train(args, logger, learner, runner, buffer, engine_configuration_channel):
     logger.console_logger.info("Finished Training")
 
 
+# 환경의 여러가지 정보들을 지정 합니다.
 def get_data_infos(args):
     scheme = {
         "state": {"vshape": args.state_shape},
@@ -140,6 +155,7 @@ def get_data_infos(args):
     return scheme, groups, preprocess
 
 
+# 학습된 가중치를 사용 합니다.
 def is_set_checkpoint(args, logger, learner, runner):
     just_testing = False
 
@@ -179,6 +195,7 @@ def is_set_checkpoint(args, logger, learner, runner):
         return just_testing
 
 
+# 안정성 검사를 수행합니다.
 def args_sanity_check(config, _log):
 
     # set CUDA flags
@@ -195,6 +212,7 @@ def args_sanity_check(config, _log):
     return config
 
 
+# 학습된 가중치의 평가를 진행 합니다.
 def evaluate_sequential(args, runner):
 
     for _ in range(args.test_nepisode):
