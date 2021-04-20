@@ -45,68 +45,26 @@ def run_sequential(args, logger, env_name):
     args.n_actions = env_arg["n_actions"]
     args.state_shape = env_arg["state_shape"]
     args.obs_shape = env_arg["obs_shape"]
-
     args.episode_limit = env_arg["episode_limit"]
+
     runner = r_REGISTRY[args.runner](args=args, logger=logger, env=env)
 
-    scheme = {
-        "state": {"vshape": args.state_shape},
-        "obs": {"vshape": args.obs_shape, "group": "agents"},
-        "actions": {"vshape": (1,), "group": "agents", "dtype": torch.long},
-        "avail_actions": {"vshape": (args.n_actions,), "group": "agents", "dtype": torch.int},
-        "reward": {"vshape": (1,)},
-        "terminated": {"vshape": (1,), "dtype": torch.uint8},
-    }
-    groups = {
-        "agents": args.n_agents
-    }
-    preprocess = {
-        "actions": ("actions_onehot", [OneHot(out_dim=args.n_actions)])
-    }
-
+    scheme, groups, preprocess = get_data_infos(args)
     buffer = ReplayBuffer(scheme, groups, args.buffer_size, args.episode_limit + 1,
                           preprocess=preprocess,
                           device="cpu" if args.buffer_cpu_only else args.device)
 
     mac = mac_REGISTRY[args.mac](buffer.scheme, groups, args)
-
     runner.setup(scheme=scheme, groups=groups, preprocess=preprocess, mac=mac)
-
     learner = le_REGISTRY[args.learner](mac, buffer.scheme, logger, args)
 
-    if args.checkpoint_path != "":
+    if is_set_checkpoint(args, logger, learner, runner) is True:
+        return
 
-        timesteps = []
-        timestep_to_load = 0
+    train(args, logger,learner, runner, buffer, engine_configuration_channel)
 
-        if not os.path.isdir(args.checkpoint_path):
-            logger.console_logger.info("Checkpoint directiory {} doesn't exist".format(args.checkpoint_path))
-            return
 
-        # Go through all files in args.checkpoint_path
-        for name in os.listdir(args.checkpoint_path):
-            full_name = os.path.join(args.checkpoint_path, name)
-            # Check if they are dirs the names of which are numbers
-            if os.path.isdir(full_name) and name.isdigit():
-                timesteps.append(int(name))
-
-        if args.load_step == 0:
-            # choose the max timestep
-            timestep_to_load = max(timesteps)
-        else:
-            # choose the timestep closest to load_step
-            timestep_to_load = min(timesteps, key=lambda x: abs(x - args.load_step))
-
-        model_path = os.path.join(args.checkpoint_path, str(timestep_to_load))
-
-        logger.console_logger.info("Loading model from {}".format(model_path))
-        learner.load_models(model_path)
-        runner.t_env = timestep_to_load
-
-        if args.evaluate or args.save_replay:
-            evaluate_sequential(args, runner)
-            return
-
+def train(args, logger, learner, runner, buffer, engine_configuration_channel):
     episode = 0
     last_test_T = -args.test_interval - 1
     last_log_T = 0
@@ -168,6 +126,65 @@ def run_sequential(args, logger, env_name):
     runner.close_env()
     logger.console_logger.info("Finished Training")
 
+
+def get_data_infos(args):
+    scheme = {
+        "state": {"vshape": args.state_shape},
+        "obs": {"vshape": args.obs_shape, "group": "agents"},
+        "actions": {"vshape": (1,), "group": "agents", "dtype": torch.long},
+        "avail_actions": {"vshape": (args.n_actions,), "group": "agents", "dtype": torch.int},
+        "reward": {"vshape": (1,)},
+        "terminated": {"vshape": (1,), "dtype": torch.uint8},
+    }
+    groups = {
+        "agents": args.n_agents
+    }
+    preprocess = {
+        "actions": ("actions_onehot", [OneHot(out_dim=args.n_actions)])
+    }
+
+    return scheme, groups, preprocess
+
+
+def is_set_checkpoint(args, logger, learner, runner):
+    just_testing = False
+
+    if args.checkpoint_path != "":
+
+        timesteps = []
+        timestep_to_load = 0
+
+        if not os.path.isdir(args.checkpoint_path):
+            logger.console_logger.info("Checkpoint directiory {} doesn't exist".format(args.checkpoint_path))
+            return
+
+        # Go through all files in args.checkpoint_path
+        for name in os.listdir(args.checkpoint_path):
+            full_name = os.path.join(args.checkpoint_path, name)
+            # Check if they are dirs the names of which are numbers
+            if os.path.isdir(full_name) and name.isdigit():
+                timesteps.append(int(name))
+
+        if args.load_step == 0:
+            # choose the max timestep
+            timestep_to_load = max(timesteps)
+        else:
+            # choose the timestep closest to load_step
+            timestep_to_load = min(timesteps, key=lambda x: abs(x - args.load_step))
+
+        model_path = os.path.join(args.checkpoint_path, str(timestep_to_load))
+
+        logger.console_logger.info("Loading model from {}".format(model_path))
+        learner.load_models(model_path)
+        runner.t_env = timestep_to_load
+
+        if args.evaluate :
+            evaluate_sequential(args, runner)
+            just_testing = True
+
+        return just_testing
+
+
 def args_sanity_check(config, _log):
 
     # set CUDA flags
@@ -183,12 +200,10 @@ def args_sanity_check(config, _log):
 
     return config
 
+
 def evaluate_sequential(args, runner):
 
     for _ in range(args.test_nepisode):
         runner.run(test_mode=True)
-
-    if args.save_replay:
-        runner.save_replay()
 
     runner.close_env()
