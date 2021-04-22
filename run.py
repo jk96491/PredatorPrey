@@ -142,8 +142,10 @@ def get_data_infos(args):
         "obs": {"vshape": args.obs_shape, "group": "agents"},
         "actions": {"vshape": (1,), "group": "agents", "dtype": torch.long},
         "avail_actions": {"vshape": (args.n_actions,), "group": "agents", "dtype": torch.int},
+        "role_avail_actions": {"vshape": (args.n_actions,), "group": "agents", "dtype": torch.int},
         "reward": {"vshape": (1,)},
         "terminated": {"vshape": (1,), "dtype": torch.uint8},
+        "roles": {"vshape": (1,), "group": "agents", "dtype": torch.long},
     }
     groups = {
         "agents": args.n_agents

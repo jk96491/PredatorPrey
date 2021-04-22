@@ -2,7 +2,7 @@ from functools import partial
 from components.episode_buffer import EpisodeBatch
 import numpy as np
 from mlagents_envs.environment import ActionTuple
-
+from utils.env_utils import get_env_info
 
 # 이 부분은 유니티 환경과 파이썬의 소통을 통한 환경 수행을 담당합니다.
 class EpisodeRunner:
@@ -45,16 +45,14 @@ class EpisodeRunner:
         self.reset()
 
         behavior_name_list = list(self.env.behavior_specs.keys())
-
         Coordinator = behavior_name_list[0]
-        Agents = behavior_name_list[1]
 
         terminated = False
         episode_return = 0
         self.mac.init_hidden(batch_size=self.batch_size)    # agent의 history(trajectory) 정보를 초기화 합니다.
 
         while not terminated:
-            state, obs, avail_actions = self.get_env_info_unity(Coordinator, Agents)
+            state, obs, avail_actions = get_env_info(behavior_name_list, self.env, self.args.n_agents)
 
             pre_transition_data = {
                 "state": [state],
@@ -89,7 +87,7 @@ class EpisodeRunner:
 
             self.t += 1
 
-        state, obs, avail_actions = self.get_env_info_unity(Coordinator, Agents)
+        state, obs, avail_actions = get_env_info(behavior_name_list, self.env, self.args.n_agents)
 
         last_data = {
             "state": [state],
@@ -133,16 +131,3 @@ class EpisodeRunner:
                 self.logger.log_stat(prefix + k + "_mean" , v/stats["n_episodes"], self.t_env)
         stats.clear()
 
-    # 현재 시점의 state, obs, avail_actions 정보들을 환경으로부터 가져 옵니다.
-    def get_env_info_unity(self, Coordinator, Agents):
-        dec, term = self.env.get_steps(Agents)
-        obs = dec.obs[0].reshape(self.args.n_agents, -1)
-
-        dec, term = self.env.get_steps(Coordinator)
-        avail_actions = np.array(dec.action_mask).squeeze(axis=1)
-        avail_actions_float = np.zeros_like(avail_actions, dtype=np.float)
-        avail_actions_float[avail_actions == False] = 1
-        avail_actions = avail_actions_float.tolist()
-        state = dec.obs[0]
-
-        return state, obs, avail_actions

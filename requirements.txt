@@ -48,3 +48,5 @@ Werkzeug==1.0.1
 wrapt==1.12.1
 zipp==3.4.0
 tensorboard-logger==0.1.0
+sklearn==0.0
+matplotlib==3.0.0

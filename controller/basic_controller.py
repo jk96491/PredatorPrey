@@ -1,4 +1,4 @@
-from Agent.rnn_agent import RNNAgent
+from modules.agents import REGISTRY as agent_REGISTRY
 from components.action_selectors import REGISTRY as action_REGISTRY
 import torch as th
 
@@ -76,7 +76,7 @@ class BasicMAC:
         self.agent.load_state_dict(th.load("{}/agent.th".format(path), map_location=lambda storage, loc: storage))
 
     def _build_agents(self, input_shape):
-        self.agent = RNNAgent(input_shape, self.args)
+        self.agent = agent_REGISTRY[self.args.agent](input_shape, self.args)
 
     # batch로 부터 agent 신경망의 input값을 뽑아 냅니다.
     def _build_inputs(self, batch, t):
