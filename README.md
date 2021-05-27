@@ -17,8 +17,8 @@ pip install -r requirements.txt
 요구 사양
  ```shell
 python 3.6 
-Unity 3D 2020.2.2f1
-Unity ML-Agent : ml-agents-release_12
+Unity 3D 2021.1.6f1
+Unity ML-Agent : ml-agents-release_17
 ```
 
 # 실행 방법 및 Unity Project
