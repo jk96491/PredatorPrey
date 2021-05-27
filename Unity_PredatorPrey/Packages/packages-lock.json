@@ -13,7 +13,7 @@
       "dependencies": {}
     },
     "com.unity.ads": {
-      "version": "3.5.2",
+      "version": "3.7.1",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -31,7 +31,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.barracuda": {
-      "version": "1.2.1-preview",
+      "version": "1.4.0-preview",
       "depth": 1,
       "source": "registry",
       "dependencies": {
@@ -42,7 +42,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.burst": {
-      "version": "1.3.4",
+      "version": "1.4.7",
       "depth": 2,
       "source": "registry",
       "dependencies": {
@@ -65,19 +65,21 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.ide.rider": {
-      "version": "2.0.7",
+      "version": "3.0.6",
       "depth": 0,
       "source": "registry",
       "dependencies": {
-        "com.unity.test-framework": "1.1.1"
+        "com.unity.ext.nunit": "1.0.6"
       },
       "url": "https://packages.unity.com"
     },
     "com.unity.ide.visualstudio": {
-      "version": "2.0.5",
+      "version": "2.0.7",
       "depth": 0,
       "source": "registry",
-      "dependencies": {},
+      "dependencies": {
+        "com.unity.test-framework": "1.1.9"
+      },
       "url": "https://packages.unity.com"
     },
     "com.unity.ide.vscode": {
@@ -95,37 +97,39 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.ml-agents": {
-      "version": "file:C:/Users/JGY/Downloads/ml-agents-release_12/com.unity.ml-agents",
+      "version": "file:com.unity.ml-agents",
       "depth": 0,
-      "source": "local",
+      "source": "embedded",
       "dependencies": {
-        "com.unity.barracuda": "1.2.1-preview",
+        "com.unity.barracuda": "1.4.0-preview",
         "com.unity.modules.imageconversion": "1.0.0",
-        "com.unity.modules.jsonserialize": "1.0.0",
-        "com.unity.modules.physics": "1.0.0",
-        "com.unity.modules.physics2d": "1.0.0",
-        "com.unity.modules.unityanalytics": "1.0.0"
+        "com.unity.modules.jsonserialize": "1.0.0"
       }
     },
     "com.unity.ml-agents.extensions": {
-      "version": "file:C:/Users/JGY/Downloads/ml-agents-release_12/com.unity.ml-agents.extensions",
+      "version": "file:com.unity.ml-agents.extensions",
       "depth": 0,
-      "source": "local",
+      "source": "embedded",
       "dependencies": {
-        "com.unity.ml-agents": "1.7.2-preview"
+        "com.unity.ml-agents": "2.0.0-exp.1",
+        "com.unity.modules.physics": "1.0.0"
       }
     },
     "com.unity.purchasing": {
-      "version": "2.2.1",
+      "version": "3.0.2",
       "depth": 0,
       "source": "registry",
       "dependencies": {
-        "com.unity.ugui": "1.0.0"
+        "com.unity.ugui": "1.0.0",
+        "com.unity.modules.unityanalytics": "1.0.0",
+        "com.unity.modules.unitywebrequest": "1.0.0",
+        "com.unity.modules.jsonserialize": "1.0.0",
+        "com.unity.modules.androidjni": "1.0.0"
       },
       "url": "https://packages.unity.com"
     },
     "com.unity.test-framework": {
-      "version": "1.1.20",
+      "version": "1.1.24",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -136,7 +140,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.textmeshpro": {
-      "version": "3.0.1",
+      "version": "3.0.4",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -145,10 +149,15 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.timeline": {
-      "version": "1.2.6",
+      "version": "1.5.4",
       "depth": 0,
       "source": "registry",
-      "dependencies": {},
+      "dependencies": {
+        "com.unity.modules.director": "1.0.0",
+        "com.unity.modules.animation": "1.0.0",
+        "com.unity.modules.audio": "1.0.0",
+        "com.unity.modules.particlesystem": "1.0.0"
+      },
       "url": "https://packages.unity.com"
     },
     "com.unity.ugui": {

@@ -51,30 +51,29 @@ public class AgentManager : Agent
 
     public override void WriteDiscreteActionMask(IDiscreteActionMask actionMask)
     {
-        // Mask the necessary actions if selected by the user.
         for (int i = 0; i < agents.Count; i++)
         {
             var positionX = (int)agents[i].Trans.localPosition.x;
             var positionZ = (int)agents[i].Trans.localPosition.z;
             var maxPosition = 9;
-            if (positionX == -maxPosition)
+            if (positionX <= -maxPosition)
             {
-                actionMask.WriteMask(i, new[] { PlayAgent.k_Left });
+                actionMask.SetActionEnabled(i, PlayAgent.k_Left, false);
             }
 
-            if (positionX == maxPosition)
+            if (positionX >= maxPosition)
             {
-                actionMask.WriteMask(i, new[] { PlayAgent.k_Right });
+                actionMask.SetActionEnabled(i, PlayAgent.k_Right, false);
             }
 
-            if (positionZ == -maxPosition)
+            if (positionZ <= -maxPosition)
             {
-                actionMask.WriteMask(i, new[] { PlayAgent.k_Down });
+                actionMask.SetActionEnabled(i, PlayAgent.k_Down, false);
             }
 
-            if (positionZ == maxPosition)
+            if (positionZ >= maxPosition)
             {
-                actionMask.WriteMask(i, new[] { PlayAgent.k_Up });
+                actionMask.SetActionEnabled(i, PlayAgent.k_Up, false);
             }
         }
     }
