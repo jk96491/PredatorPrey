@@ -27,7 +27,7 @@ def get_env_info(env_name, args):
         "n_actions": dec.action_mask[0].shape[1],
         "state_shape": state.shape[1],
         "obs_shape": obs.shape[1],
-        "episode_limit": 160
+        "episode_limit": 250
     }
 
     return env, env_arg, engine_configuration_channel
